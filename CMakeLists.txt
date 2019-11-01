@@ -36,7 +36,7 @@ add_subdirectory(src)
 
 #if someone else includes this package, and they use BUILD_TESTING, they probably do not want the tests here
 #if(CMAKE_PROJECT_NAME STREQUAL DCABenchmark AND BUILD_TESTING)
-#add_subdirectory(test)
+add_subdirectory(test)
 
     ##### TODO weg damit
 #    target_include_directories(gbBase_Test PUBLIC ${GB_BASE_TEST_DIR})
