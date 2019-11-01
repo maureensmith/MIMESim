@@ -7,9 +7,17 @@
 
 #include "Species.hpp"
 #include "Constants.hpp"
+//TODO anders lösen mit den Pfaden
 #include "../extern/CppNumericalSolvers/cppoptlib/meta.h"
 #include "../extern/CppNumericalSolvers/cppoptlib/boundedproblem.h"
 #include <valarray>
+
+// define aliases
+using count_type = unsigned int;
+using kd_type = double;
+using frequency_type = double;
+
+
 
 //template<typename T>
 //TODO: Umbau nach counts
@@ -18,24 +26,25 @@ class UnboundProtein : public cppoptlib::BoundedProblem<double> {
 private:
     /**** Constants regarding ODE solving *****/
     //the total amount of Protein
+    //TODO the amount of protein in relation to the amount of sequences
     static constexpr double B_TOT = 2.0;
     //TODO: Umbau nach counts
     //static constexpr int B_TOT = 12*pow(10,6);
 
     //species kds
-    const std::valarray<double> kds;
+    const std::valarray<kd_type> kds;
     //species frequencies
-    const std::valarray<double> frequencies;
+    const std::valarray<frequency_type> frequencies;
     //TODO: Umbau nach counts
     //species counts
-    const std::valarray<unsigned int> counts;
+    const std::valarray<count_type> counts;
 
-    std::valarray<double> getSpeciesKds(const species::species_map& spec);
+    std::valarray<kd_type> getSpeciesKds(const species::species_map& spec);
 
-    std::valarray<double> getSpeciesFrequencies(const species::species_map& spec);
+    std::valarray<frequency_type> getSpeciesFrequencies(const species::species_map& spec);
 
     //TODO: Umbau nach counts
-    std::valarray<unsigned int> getSpeciesCounts(const species::species_map& spec);
+    std::valarray<count_type > getSpeciesCounts(const species::species_map& spec);
 
 public:
     //TODO: Umbau nach counts
@@ -58,13 +67,13 @@ public:
 
     //TODO: Umbau nach counts
     //double solve(std::valarray<double>& S_bound, std::valarray<double>& S_unbound);
-    double solve(std::valarray<unsigned int>& S_bound, std::valarray<unsigned int>& S_unbound);
+    double solve(std::valarray<count_type>& S_bound, std::valarray<count_type>& S_unbound);
 
-    static const int getB_tot();
+    static const count_type getB_tot();
 
-    const std::valarray<double> &getKds() const;
+    const std::valarray<kd_type> &getKds() const;
 
-    const std::valarray<double> &getFrequencies() const;
+    const std::valarray<frequency_type> &getFrequencies() const;
 
 };
 

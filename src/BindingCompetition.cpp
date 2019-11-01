@@ -7,8 +7,8 @@
 #include <chrono>
 #include <random>
 
-std::valarray<double> UnboundProtein::getSpeciesKds(const species::species_map& spec) {
-    std::valarray<double> kds(spec.size());
+std::valarray<kd_type> UnboundProtein::getSpeciesKds(const species::species_map& spec) {
+    std::valarray<kd_type> kds(spec.size());
     unsigned i=0;
     for(auto& s:spec) {
     //for(int i=0; i < spec.size(); ++i) {
@@ -18,8 +18,8 @@ std::valarray<double> UnboundProtein::getSpeciesKds(const species::species_map& 
     return kds;
 }
 
-std::valarray<double> UnboundProtein::getSpeciesFrequencies(const species::species_map& spec){
-    std::valarray<double> freq(spec.size());
+std::valarray<frequency_type> UnboundProtein::getSpeciesFrequencies(const species::species_map& spec){
+    std::valarray<frequency_type> freq(spec.size());
     unsigned i=0;
     for(auto& s:spec) {
     //for(int i=0; i < spec.size(); ++i) {
@@ -30,8 +30,8 @@ std::valarray<double> UnboundProtein::getSpeciesFrequencies(const species::speci
 }
 
 //TODO: Umbau nach counts
-std::valarray<unsigned int> UnboundProtein::getSpeciesCounts(const species::species_map &spec) {
-    std::valarray<unsigned int> count(spec.size());
+std::valarray<count_type> UnboundProtein::getSpeciesCounts(const species::species_map &spec) {
+    std::valarray<count_type> count(spec.size());
     unsigned i=0;
     for(auto& s:spec) {
         //for(int i=0; i < spec.size(); ++i) {
@@ -41,8 +41,9 @@ std::valarray<unsigned int> UnboundProtein::getSpeciesCounts(const species::spec
     return count;
 }
 
-unsigned int drawNumberOfSequences(const unsigned int N, const double p) {
-    const auto seed = static_cast<unsigned int>(std::chrono::system_clock::now().time_since_epoch().count());
+//TODO Beschreibe/Umbenennen: drawing number of sequences of a binomial distribution
+count_type drawNumberOfSequences(const unsigned int N, const double p) {
+    const auto seed = static_cast<count_type>(std::chrono::system_clock::now().time_since_epoch().count());
     std::default_random_engine generator(seed);
     std::binomial_distribution<int> bino(N, p);
     return bino(generator);
@@ -51,7 +52,7 @@ unsigned int drawNumberOfSequences(const unsigned int N, const double p) {
 
 //TODO: Umbau nach counts
 //double UnboundProtein::solve(std::valarray<double>& S_bound, std::valarray<double>& S_unbound) {
-double UnboundProtein::solve(std::valarray<unsigned int>& S_bound, std::valarray<unsigned int>& S_unbound) {
+double UnboundProtein::solve(std::valarray<count_type>& S_bound, std::valarray<count_type>& S_unbound) {
 
     // choose a starting point (the amount of unbound protein, in the beginning = total amount of protein)
     //TODO: Umbau nach counts
@@ -76,7 +77,7 @@ double UnboundProtein::solve(std::valarray<unsigned int>& S_bound, std::valarray
 
     //TODO: ich will ja nur die anzahl von der species samples, nicht alles f_s*f_s_b
     //std::valarray<double> f_bound = frequencies/(1.0+(kds/B[0]));
-    std::valarray<double> f_bound = 1.0/(1.0+(kds/B[0]));
+    std::valarray<frequency_type> f_bound = 1.0/(1.0+(kds/B[0]));
     //auto f_unbound = frequencies - f_bound;
 
     //TODO: Sampling statt runden, vielleicht beeser in BindinCompetition
@@ -91,12 +92,13 @@ double UnboundProtein::solve(std::valarray<unsigned int>& S_bound, std::valarray
 //        std::cout << "bound p" << p << " Stot "  << " " << s << " " << blub << " " << (s-blub) << std::endl;
 //        return blub;
 //    });
-
+    //TODO catch Error: if S_bound is not empty
     std::transform(std::begin(f_bound), std::end(f_bound), std::begin(counts), std::begin(S_bound), [](const auto p, const auto s) {
         auto blub =  drawNumberOfSequences(s, p);
         //auto blub = floor(s*p);
         //sample die rundung anhand des rests
         //blub += drawNumberOfSequences(1, (s*p)-floor(s*p));
+        //TODO output entfernen
         std::cout << "bound p" << p << " Stot "  << " " << s << " " << blub << " " << (s-blub) << " " << round(s*p) - blub<< std::endl;
         return blub;
     });
@@ -118,15 +120,15 @@ double UnboundProtein::solve(std::valarray<unsigned int>& S_bound, std::valarray
     return B[0] ;
 }
 
-const int UnboundProtein::getB_tot() {
+const count_type UnboundProtein::getB_tot() {
     return B_TOT;
 }
 
-const std::valarray<double> &UnboundProtein::getKds() const {
+const std::valarray<kd_type> &UnboundProtein::getKds() const {
     return kds;
 }
 
-const std::valarray<double> &UnboundProtein::getFrequencies() const {
+const std::valarray<frequency_type> &UnboundProtein::getFrequencies() const {
     return frequencies;
 }
 

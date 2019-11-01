@@ -30,12 +30,6 @@ namespace constants {
             std::cout << "pmut " << pMut << " L " << L << std::endl;
             std::cout << "max mut" << maxMut << " Exp. count " << M * pow(pMut,maxMut+1) * pow(1-pMut, L-maxMut-1) << std::endl;
         }while(M * pow(pMut,maxMut+1) * pow(1-pMut, L-maxMut-1) > 5 && maxMut < L);
-
-//        for(int i = maxMut+1; i<10; ++i){
-//            if(pow(p_mut,i) * pow(1-p_mut, L-i) > 1){
-//                maxMut = i;
-//            }
-//        }
         return maxMut;
     }
 
