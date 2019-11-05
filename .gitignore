@@ -2,6 +2,7 @@
 .*
 !\.gitignore
 *build*
+/coverage
 
 # Prerequisites
 *.d

@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.10)
 project(DCABenchmark)
+#Option to run Unit Tests
+option(DCABenchmarkTest_WITH_COV "Enable profiling and coverage report analysis" OFF)
+option(UNIT_TESTING "Enable Unit Testing" ON)
+SET(CMAKE_CODEBLOCKS_EXCLUDE_EXTERNAL_FILES OFF)
+
 #TODO Projekt umbeennnen: Ist ja erstmal nur Datenerzeugen, bzw Sequenz Evolution für gewisse Funktion/Evolutionary constraints simulieren:
 set(DCABenchmark_VERSION_MAJOR 0)
 set(DCABenchmark_VERSION_MINOR 1)
@@ -7,7 +12,9 @@ set(DCABenchmark_VERSION_PATCH 0)
 set(DCABenchmark_VERSION "${DCABenchmark_VERSION_MAJOR}.${DCABenchmark_VERSION_MINOR}.${DCABenchmark_VERSION_PATCH}")
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS_RELEASE "${MAKE_CXX_FLAGS_RELEASE} -O3 -DNDEBUG")
+#set(CMAKE_CXX_FLAGS_RELEASE "${MAKE_CXX_FLAGS_RELEASE} -O3 -DNDEBUG")
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 
 #include_directories(extern DCABenchmark TestDCABenchmark)
@@ -34,13 +41,24 @@ add_subdirectory(src)
 
 ################## Testing #########################################################
 
-#if someone else includes this package, and they use BUILD_TESTING, they probably do not want the tests here
-#if(CMAKE_PROJECT_NAME STREQUAL DCABenchmark AND BUILD_TESTING)
-add_subdirectory(test)
+if(UNIT_TESTING)
+    MESSAGE(${CMAKE_CXX_COMPILER_ID})
+    #gcov is only available with gcc
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND DCABenchmarkTest_WITH_COV)
+        #Flags to analyse the code coverage of the unit tests
+        # --coverage =  generate additional info for gcov, is a synonym for -ftest-coverage, -fprofile-arcs and -lgcov
+        #-g = debugging info, -p = collect profiling stats during runtime for code coverage analysis
+        #-o0 = compiler allocates distinct stack memory for variables without register storage
+        #--coverage = generate additional info for gcov
+        #-ftest-coverage = generate info in '.gcno' to reconstruct the basic block graphs and assign source line numbers to blocks.
+        #-fprofile-arcs = a separate ‘.gcda’ file is created for eachobject file compiled, Add code so that program flowarcsare instrumented
+        #TODO manual of gcov says either .gcda or .gcno ??
+        SET(GCC_COVERAGE_COMPILE_FLAGS "-O0 --coverage -fprofile-arcs")
+       # SET(GCC_COVERAGE_LINK_FLAGS    " -lgcov")
+        SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${GCC_COVERAGE_COMPILE_FLAGS}" )
+        MESSAGE(${CMAKE_CXX_FLAGS})
+       # SET( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${GCC_COVERAGE_LINK_FLAGS}" )
+    endif()
+    add_subdirectory(test)
 
-    ##### TODO weg damit
-#    target_include_directories(gbBase_Test PUBLIC ${GB_BASE_TEST_DIR})
-#    target_compile_definitions(gbBase_Test PRIVATE $<$<CONFIG:Debug>:GHULBUS_CONFIG_ASSERT_LEVEL_DEBUG>)
-#    target_compile_definitions(gbBase_Test PUBLIC $<$<CXX_COMPILER_ID:MSVC>:_ENABLE_EXTENDED_ALIGNED_STORAGE>)
-#    add_test(NAME TestBase COMMAND gbBase_Test)
-#endif()
+endif()
