@@ -27,8 +27,6 @@ namespace constants {
         unsigned int maxMut = 2;
         do{
             ++maxMut;
-            std::cout << "pmut " << pMut << " L " << L << std::endl;
-            std::cout << "max mut" << maxMut << " Exp. count " << M * pow(pMut,maxMut+1) * pow(1-pMut, L-maxMut-1) << std::endl;
         }while(M * pow(pMut,maxMut+1) * pow(1-pMut, L-maxMut-1) > 5 && maxMut < L);
         return maxMut;
     }
@@ -72,10 +70,6 @@ namespace constants {
         else
             throw("Singleton not correctly instantiated.");
     }
-
-//    Constants& Constants::create_instance(unsigned int length, unsigned int q, double p_mut){
-//        return create_instance(length, q, p_mut, 0);
-//    }
 
     Constants& Constants::create_instance(unsigned int length, unsigned int q, double p_mut, double p_error, double p_effect, double p_epistasis){
         //static Constants instance(length);

@@ -1,8 +1,12 @@
+#vorübergehend bis es ausgereift ist
+/coverage
+callUTCodeCoverageAnalysis.sh
+
 # build and hidden files and directories 
 .*
 !\.gitignore
 *build*
-/coverage
+*test*
 
 # Prerequisites
 *.d

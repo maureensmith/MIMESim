@@ -7,9 +7,15 @@
 //
 
 #include "Utils.hpp"
+#include "Constants.hpp"
 #include <iostream>
 #include <math.h>
 #include <numeric>
+#include <filesystem>
+#include <iostream>
+#include <fstream>
+
+namespace fs = std::filesystem;
 
 //TODO: Utils in DCA packen, da es nicht Benchmark spezifisch ist
 
@@ -117,6 +123,130 @@ namespace utils {
             std::cerr << "ERROR: id is too big for length of sequence and number of mutations" << std::endl;
         }
         return mutPos;
+    }
+
+    // use only locally
+    static void printParameters() {
+        auto& cons = constants::Constants::get_instance();
+
+        std::cout << std::endl;
+        std::cout << "### paratemers regarding kd sampling ###\n";
+        std::cout << "kd_wt\t" <<  cons.KD_WT << '\n';
+        std::cout << "p_effect\t" <<  cons.P_EFFECT << '\n';
+        std::cout << "p_epistasis\t" <<  cons.P_EPISTASIS << '\n';
+        std::cout << "### paramters regarding sequence sampling ###\n";
+        std::cout << "L\t" <<  cons.L << '\n';
+        std::cout << "q\t" <<  cons.Q << '\n';
+        std::cout << "M\t" <<  cons.M << '\n';
+        std::cout << "p_mut\t" <<  cons.P_MUT << '\n';
+        std::cout << "p_error\t" <<  cons.P_ERR << '\n';
+        std::cout << std::endl;
+    }
+
+
+    void readParameters(const std::string &outputPath){
+
+        // if output directory does not exist yet, create it
+        if(!fs::exists(outputPath)){
+            fs::path outpath(outputPath);
+            fs::create_directory(outpath);
+            std::cout << "Create output directory " << absolute(outpath).string() << std::endl;
+        }
+
+
+        // dafault parameters, in case no file is given, or paramater are not set in the file
+        //TODO If L is big, the id range gets really high -> long statt int. if any error, look for to high ints
+        //sequence length
+        unsigned int L = 50;
+        // symbols per position
+        unsigned int q = 2;
+        //mutation probability
+        double p_mut = 0.1;
+        double p_error = p_mut / 10.0;
+        double p_effect = 0.5;
+        double p_epistasis = 0.3;
+        //unsigned int M = 12 * pow(10, 6);
+
+        const fs::path paraFile = outputPath+"/parameter.txt";
+        // if the output directory contains the parameter file, read it
+        if(fs::exists(paraFile) && fs::is_regular_file(paraFile)) {
+            std::ifstream infile(paraFile.string());
+
+            if (infile.good()) {
+                std::cout << "Reading file " << paraFile.string();
+                std::string line;
+                std::string param;
+                std::string val;
+
+
+                try {
+
+                    while (std::getline(infile, line)) {
+
+                        //stream through each line to read the parameter name and its value, seperated by tabular
+                        std::istringstream lineSS(line);
+
+                        std::getline(lineSS, param, '\t');
+                        std::getline(lineSS, val, '\t');
+                        //TODO ist erstmal fest auf 1.0 gesetzt und M auf 12 Mio
+                        //if(param == "kd_wt")
+                        //    kd_wt = std::stoi(val);
+                        //if(param == "M")
+                        //    M = std:stoi(val);
+                        if (param == "L")
+                            L = std::stoi(val);
+                        if (param == "q")
+                            q = std::stoi(val);
+                        if (param == "p_mut")
+                            p_mut = std::stod(val);
+                        if (param == "p_error")
+                            p_error = std::stod(val);
+                        if (param == "p_effect")
+                            p_effect = std::stod(val);
+                        if (param == "p_epistasis")
+                            p_epistasis = std::stod(val);
+                    }
+                    infile.close();
+                    std::cout << " ... successful." << std::endl;
+                }  catch (const std::invalid_argument& ia) {
+                    //TODO anders mit umgehen?
+                    std::cerr << "Error in parameter file. Invalid argument for parameter " << param << " ("<< ia.what() << ")"<< '\n';
+                    std::cout << "Using default parameters." << std::endl;
+                }
+            }
+        } else {
+            //...if no config file is given, create the constants with the default parameter values
+            std::cout << "No parameter file given. Using default parameters." << std::endl;
+            //TODO so oder so noch die parameter ausgeben.
+            //TODO test case für parameter einlesen
+        }
+
+        // Create constants which are used through out this test set
+        constants::Constants& cons = constants::Constants::create_instance(L, q, p_mut, p_error, p_effect, p_epistasis);
+        printParameters();
+    }
+
+
+    void writeParameters() {
+
+        auto& cons = constants::Constants::get_instance();
+
+        std::ofstream paraOutfile(cons.PARAMETER_FILE);
+
+        if (paraOutfile.good())
+        {
+            paraOutfile << "### paratemers regarding kd sampling ###\n";
+            paraOutfile << "kd_wt\t" <<  cons.KD_WT << '\n';
+            paraOutfile << "p_effect\t" <<  cons.P_EFFECT << '\n';
+            paraOutfile << "p_epistasis\t" <<  cons.P_EPISTASIS << '\n';
+            paraOutfile << "### paramters regarding sequence sampling ###\n";
+            paraOutfile << "L\t" <<  cons.L << '\n';
+            paraOutfile << "q\t" <<  cons.Q << '\n';
+            paraOutfile << "M\t" <<  cons.M << '\n';
+            paraOutfile << "p_mut\t" <<  cons.P_MUT << '\n';
+            paraOutfile << "p_error\t" <<  cons.P_ERR << '\n';
+            paraOutfile.close();
+        }
     }
 
 }

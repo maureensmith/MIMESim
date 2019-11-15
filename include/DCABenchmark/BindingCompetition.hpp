@@ -7,9 +7,8 @@
 
 #include "Species.hpp"
 #include "Constants.hpp"
-//TODO anders lösen mit den Pfaden
-#include "../extern/CppNumericalSolvers/cppoptlib/meta.h"
-#include "../extern/CppNumericalSolvers/cppoptlib/boundedproblem.h"
+#include "cppoptlib/meta.h"
+#include "cppoptlib/boundedproblem.h"
 #include <valarray>
 
 // define aliases
@@ -22,11 +21,10 @@ using frequency_type = double;
 //template<typename T>
 //TODO: Umbau nach counts
 class UnboundProtein : public cppoptlib::BoundedProblem<double> {
-//class UnboundProtein : public cppoptlib::BoundedProblem<double> {
 private:
     /**** Constants regarding ODE solving *****/
     //the total amount of Protein
-    //TODO the amount of protein in relation to the amount of sequences
+    //TODO the amount of protein in relation to the amount of sequences, change into total numbers?
     static constexpr double B_TOT = 2.0;
     //TODO: Umbau nach counts
     //static constexpr int B_TOT = 12*pow(10,6);
@@ -56,11 +54,13 @@ public:
     UnboundProtein(const species::species_map& spec) : Superclass(1), kds(getSpeciesKds(spec)),
                                                        frequencies(getSpeciesFrequencies(spec)), counts(getSpeciesCounts(spec)) {};
 
-    //TODO: Umbau nach counts
+
     // the objective to be minimised
+    //TODO: Umbau nach counts
     double value(const TVector &x) {
     //double value(const TVector &x) {
         //TODO: Umbau nach counts
+        //TODO: B also total number ausgeben?
         return   pow(B_TOT - (x[0]*(frequencies/(kds+double(x[0]))).sum())-x[0], 2);
         //return  pow(B_TOT - (x[0]*(counts/(kds+double(x[0]))).sum())-x[0], 2);
     }

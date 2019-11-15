@@ -26,62 +26,48 @@
 namespace fs = std::filesystem;
 
 int main(int argc, const char * argv[]) {
-    //std::cout << "Current path: " << fs::current_path() << std::endl;
 
-    //fs::path outputPath_("./");
-    std::string outputPath("./");
-    if(argc > 1)
+    std::cout << "****** Set up constants *******" << std::endl;
+    //measuring realtime duration (see std::clock for cpu time)
+    auto start = std::chrono::high_resolution_clock::now();
+
+    //TODO besser Lösung für .. finden
+    std::string outputPath("../results");
+    if(argc > 1) {
         outputPath = argv[1];
-    std::cout << outputPath << std::endl;
+    }
+
+    if(!fs::exists(outputPath)){
+        fs::path outpath(outputPath);
+        fs::create_directory(outpath);
+        std::cout << "Create output directory " << absolute(outpath).string() << std::endl;
+    } else {
+        std::cout << "Using output directory " << outputPath << std::endl;
+    }
+
+    utils::readParameters(outputPath);
+
+    // get the newly created instance of the constants
+    auto& cons = constants::Constants::get_instance();
+
     // The 4 output files are saved with their ids where wild_type_bound = firstId, wild_type_unbound = firstId+1,
             // mut_bound = firstId+2, mut_unbound = firstId+3
-
-    //if(argc > 2)
-    //    firstId = std::stoi(argv[2]);
     int firstId = 1;
     std::string wt_bound_id(std::to_string(firstId));
     std::string wt_unbound_id(std::to_string(firstId+1));
     std::string mut_bound_id(std::to_string(firstId+2));
     std::string mut_unbound_id(std::to_string(firstId+3));
 
-    //TODO If L is big, the id range gets really high -> long statt int. if any error, look for to high ints
-    //sequence length
-    unsigned int L = 50;
-    if(argc > 2)
-        L = std::stoi(argv[2]);
-    // Parameter Setting
-    //TODO: später mit ner Config list oder sowas.
-    // symbols per position
-    unsigned int q=2;
+//TODO in einen Test mit einbringen
+//    std::cout << "Maximal number of mutations: " << cons.MAX_MUT << std::endl;
 
-
-
-    //TODO überprüfen: bei L = 500 soll die mutation rate 0.001 sein
-    double p_mut = 0.01;//0.001;//3*0.001;//5/double(L);
-    if(argc > 3)
-        p_mut = std::stod(argv[3]);
-
-    double p_error = p_mut/10.0;
-    if(argc > 4)
-        p_error = std::stod(argv[4]);
-
-    //p_error = 0.0;
-
-    double p_effect = 0.5;
-    if(argc > 5)
-        p_effect = std::stod(argv[5]);
-
-    double p_epistasis = 0.7;
-    if(argc > 6)
-        p_epistasis = std::stod(argv[6]);
-
-
-    std::cout << "****** Set up constants *******" << std::endl;
-    // Create constants which are used through out this test set
-    constants::Constants& cons = constants::Constants::create_instance(L, q, p_mut, p_error, p_effect, p_epistasis);
-    std::cout << "Max Mut " << cons.MAX_MUT << std::endl;
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> diff = end-start;
+    std::cout << "Duration: " << diff.count() << " s\n";
 
     std::cout << "****** Sample mutational effects *******" << std::endl;
+    start = std::chrono::high_resolution_clock::now();
+
     // Create Ground Truth: Effects of each mutated position and epistatic effects and sequencing noise
     FunctionalSequence& effects = FunctionalSequence::get_instance();
     std::vector<Mutation> mutationsPerPos_vec;
@@ -91,7 +77,12 @@ int main(int argc, const char * argv[]) {
         mutationsPerPos_vec.emplace_back(i, effects.getKd(i));
     }
 
+    end = std::chrono::high_resolution_clock::now();
+    diff = end-start;
+    std::cout << "Duration: " << diff.count() << " s\n";
+
     std::cout << "****** Create species *******" << std::endl;
+    start = std::chrono::high_resolution_clock::now();
     // Create M species
     auto specId_map = species::drawSpeciesIds();
     //std::vector<species::Species> species_vec;
@@ -111,13 +102,18 @@ int main(int argc, const char * argv[]) {
         //species_vec.back().computeSpeciesKd();
         //std::cout << "id " << it->first << " nummut " << species_vec.at(it->first).getNumMut() << " counts " << it->second  << std::endl;
     }
-    std::cout << "wt species count + freq. " << species_vec.at(1).getCount() << " " << species_vec.at(1).getFreq() << std::endl;
-    std::cout << "mut species count + freq. " << species_vec.at(2).getCount() << " " << species_vec.at(2).getFreq() << std::endl;
-    std::cout << "mut species count + freq. " << species_vec.at(3).getCount() << " " << species_vec.at(3).getFreq() << std::endl;
-    //std::cout << "mut bound unbound freq. " << species_vec.at(20877).getCount() << " " << species_vec.at(20877).getFreq() << std::endl;
+    //TODO: diese Art der Abfrage in die Tests packen
+//    std::cout << "wt species count + freq. " << species_vec.at(1).getCount() << " " << species_vec.at(1).getFreq() << std::endl;
+//    std::cout << "mut species count + freq. " << species_vec.at(2).getCount() << " " << species_vec.at(2).getFreq() << std::endl;
+//    std::cout << "mut species count + freq. " << species_vec.at(3).getCount() << " " << species_vec.at(3).getFreq() << std::endl;
+//    //std::cout << "mut bound unbound freq. " << species_vec.at(20877).getCount() << " " << species_vec.at(20877).getFreq() << std::endl;
 
+    end = std::chrono::high_resolution_clock::now();
+    diff = end-start;
+    std::cout << "Duration: " << diff.count() << " s\n";
 
     std::cout << "****** Create unmutated wild type library  *******" << std::endl;
+    start = std::chrono::high_resolution_clock::now();
     //auto wtSpecId_map = species::drawWildtypeErrors();
     //std::vector<species::Species> wtSpecies_vec;
     species::species_map wtSpecies_vec;
@@ -125,8 +121,13 @@ int main(int argc, const char * argv[]) {
     currentObj.first->second.setCount(cons.M);
     currentObj.first->second.computeSpeciesKd();
 
+    end = std::chrono::high_resolution_clock::now();
+    diff = end-start;
+    std::cout << "Duration: " << diff.count() << " s\n";
+
 
     std::cout << "****** Solve ODE to infer bound and unbound fraction of species *******" << std::endl;
+    start = std::chrono::high_resolution_clock::now();
     //TODO: Umbau nach counts
     //std::valarray<double> f_bound_tot;
     //std::valarray<double> f_unbound_tot;
@@ -154,8 +155,12 @@ int main(int argc, const char * argv[]) {
     UnboundProtein f_wt(wtSpecies_vec);
     f_wt.solve(S_bound_wt, S_unbound_wt);
 
-    std::cout << "****** Add noise *******" << std::endl;
+    end = std::chrono::high_resolution_clock::now();
+    diff = end-start;
+    std::cout << "Duration: " << diff.count() << " s\n";
 
+    std::cout << "****** Add noise *******" << std::endl;
+    start = std::chrono::high_resolution_clock::now();
     //Carefull: The map is extended by species that occur only because of sequencing error, hence the length of S_bound and
     //S_unbound dont fit any more with the length of the map
     //TODO: Umbau nach counts
@@ -163,7 +168,12 @@ int main(int argc, const char * argv[]) {
 
     species::addCountsWithError(S_bound_wt, S_unbound_wt, wtSpecies_vec);
 
+    end = std::chrono::high_resolution_clock::now();
+    diff = end-start;
+    std::cout << "Duration: " << diff.count() << " s\n";
+
     std::cout << "****** Count Mut Library *******" << std::endl;
+    start = std::chrono::high_resolution_clock::now();
     // create reference (here only As, Cs are mutations)
     ref::reference ref;
     ref::ref_map wt_read;
@@ -259,14 +269,18 @@ int main(int argc, const char * argv[]) {
             //break;
     }
 
-    std::cout << std::endl;
-    std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>( t2 - t1 ).count();
+    end = std::chrono::high_resolution_clock::now();
+    diff = end-start;
+    std::cout << "Duration: " << diff.count() << " s\n";
 
-    std::cout <<"Time with L=" << L << " specVec " << species_vec.size() << " " <<duration <<std::endl;
+//    std::cout << std::endl;
+//    std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+//    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>( t2 - t1 ).count();
+
+   // std::cout <<"Time with L=" << L << " specVec " << species_vec.size() << " " <<duration <<std::endl;
 
     std::cout << "****** Count Wt Library *******" << std::endl;
-
+    start = std::chrono::high_resolution_clock::now();
     //count for wt
     count::counter_1 counter_bound_1d_wt{ref};
     count::counter_1 counter_unbound_1d_wt{ref};
@@ -291,12 +305,12 @@ int main(int argc, const char * argv[]) {
         counter_bound_1d_wt.count(spec.second.getRead(), times_bound);
         counter_unbound_1d_wt.count(spec.second.getRead(), times_unbound);
 
-        if (spec.first < 100) {
-        std::cout << "id " << spec.first << " countTot " << spec.second.getCount() << " bound " << times_bound
-              << " unbound " << times_unbound << std::endl;
-            std::cout << " bound mut " << spec.second.getMutCountBound() <<  " bound err " << spec.second.getErrorCountBound() << std::endl;
-            std::cout << " unbound mut " << spec.second.getMutCountUnbound() <<  " unbound err " << spec.second.getErrorCountUnbound() << std::endl;
-        }
+//        if (spec.first < 100) {
+//        std::cout << "id " << spec.first << " countTot " << spec.second.getCount() << " bound " << times_bound
+//              << " unbound " << times_unbound << std::endl;
+//            std::cout << " bound mut " << spec.second.getMutCountBound() <<  " bound err " << spec.second.getErrorCountBound() << std::endl;
+//            std::cout << " unbound mut " << spec.second.getMutCountUnbound() <<  " unbound err " << spec.second.getErrorCountUnbound() << std::endl;
+//        }
 
         for(auto pos1:spec.second.getMutatedPositions()) {
 
@@ -336,12 +350,18 @@ int main(int argc, const char * argv[]) {
 
     }
 
-     t2 = std::chrono::high_resolution_clock::now();
-    duration = std::chrono::duration_cast<std::chrono::milliseconds>( t2 - t1 ).count();
-    std::cout <<"Time with L=" << L << " wtSpecVec " << wtSpecies_vec.size() << " " <<duration <<std::endl;
+//     t2 = std::chrono::high_resolution_clock::now();
+//    duration = std::chrono::duration_cast<std::chrono::milliseconds>( t2 - t1 ).count();
+//    std::cout <<"Time with L=" << L << " wtSpecVec " << wtSpecies_vec.size() << " " <<duration <<std::endl;
+
+    end = std::chrono::high_resolution_clock::now();
+    diff = end-start;
+    std::cout << "Duration: " << diff.count() << " s\n";
 
 
     std::cout << "****** Write output to file *******" << std::endl;
+    start = std::chrono::high_resolution_clock::now();
+
     std::filesystem::path outPath =outputPath;
     if(!fs::exists(outPath));
         fs::create_directory(outPath);
@@ -356,6 +376,10 @@ int main(int argc, const char * argv[]) {
     counter_unbound_1d_wt.write_to_file(outputPath +"/1d/"+wt_unbound_id+".txt");
     counter_bound_2d_wt.write_to_file(outputPath +"/2d/"+wt_bound_id+".txt");
     counter_unbound_2d_wt.write_to_file(outputPath +"/2d/"+wt_unbound_id+".txt");
+
+    end = std::chrono::high_resolution_clock::now();
+    diff = end-start;
+    std::cout << "Duration: " << diff.count() << " s\n";
 
     std::cout << "****** Write true values to files *******" << std::endl;
     effects.writeEpistasisToFile(outputPath+"/pairwise_epistasis.txt");
@@ -372,7 +396,15 @@ int main(int argc, const char * argv[]) {
         outfile.close();
     }
 
+    end = std::chrono::high_resolution_clock::now();
+    diff = end-start;
+    std::cout << "Duration: " << diff.count() << " s\n";
+
     std::cout << "****** Write parameter into File *******" << std::endl;
+    start = std::chrono::high_resolution_clock::now();
+
+    utils::writeParameters();
+
     std::ofstream paraOutfile(outputPath+"/parameter.txt");
 
     if (outfile.good())
@@ -389,6 +421,10 @@ int main(int argc, const char * argv[]) {
         paraOutfile << "p_error\t" <<  cons.P_ERR << '\n';
         paraOutfile.close();
     }
+
+    end = std::chrono::high_resolution_clock::now();
+    diff = end-start;
+    std::cout << "Duration: " << diff.count() << " s\n";
 
     std::cout << "****** Done *******" << std::endl;
 

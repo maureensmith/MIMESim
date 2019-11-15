@@ -21,7 +21,16 @@ namespace utils {
     std::vector<unsigned int> getMultinomialRange(unsigned int maxRange, unsigned int L, unsigned int q);
     mutatedPositions specIdxToMutPos(const unsigned long specIdx, const unsigned int L, const unsigned int numSymbols,
                                      const std::vector<unsigned int> &nMutRange);
+    /**
+     * Read in parameters from a given parameter file in the given result directory. If there is no file, use default parameters
+     * TODO: entweder result ordner angeben als Muss, wo ggf die parameter liste drin ist
+     */
+    void readParameters(const std::string &outputPath);
 
+    /**
+     * Write parameters into parameters.txt file in result directory
+     */
+    void writeParameters();
 }
 
 #endif /* Utils_hpp */

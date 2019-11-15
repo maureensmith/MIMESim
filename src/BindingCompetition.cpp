@@ -3,7 +3,7 @@
 //
 
 #include "BindingCompetition.hpp"
-#include "../extern/CppNumericalSolvers/cppoptlib/solver/lbfgsbsolver.h"
+#include "cppoptlib/solver/lbfgsbsolver.h"
 #include <chrono>
 #include <random>
 
@@ -41,8 +41,13 @@ std::valarray<count_type> UnboundProtein::getSpeciesCounts(const species::specie
     return count;
 }
 
-//TODO Beschreibe/Umbenennen: drawing number of sequences of a binomial distribution
-count_type drawNumberOfSequences(const unsigned int N, const double p) {
+//TODO Beschreibe/Umbenennen: drawing number of sequences of a binomial distribution, oder Beschreibung generell halten?
+/*
+ * Draw number of sequence from Binomial distribution with
+ *  @param N the total number of a particular sequence
+ *  @param p the probability being bound
+ */
+count_type drawBinomialNumber(const unsigned int N, const double p) {
     const auto seed = static_cast<count_type>(std::chrono::system_clock::now().time_since_epoch().count());
     std::default_random_engine generator(seed);
     std::binomial_distribution<int> bino(N, p);
@@ -80,27 +85,23 @@ double UnboundProtein::solve(std::valarray<count_type>& S_bound, std::valarray<c
     std::valarray<frequency_type> f_bound = 1.0/(1.0+(kds/B[0]));
     //auto f_unbound = frequencies - f_bound;
 
-    //TODO: Sampling statt runden, vielleicht beeser in BindinCompetition
     //first sample the number of unbound sequences of the sequence variant
     auto& constants = constants::Constants::get_instance();
 
-    // sample for each simulated frequency the number of actual bound counts from the total count of that species
+
 //    std::transform(std::begin(f_bound), std::end(f_bound), std::begin(counts), std::begin(S_bound), [m = constants.M](const auto p, const auto s) {
-//        //auto blub =  std::min(drawNumberOfSequences(m, p),s);
+//        //auto blub =  std::min(drawBinomialNumber(m, p),s);
 //        auto blub =  std::floor(m*p)
-//                + std::min(drawNumberOfSequences(m, p),s);
+//                + std::min(drawBinomialNumber(m, p),s);
 //        std::cout << "bound p" << p << " Stot "  << " " << s << " " << blub << " " << (s-blub) << std::endl;
 //        return blub;
 //    });
+
+    // sample for each simulated frequency the number of actual bound counts from the total count of that species
     //TODO catch Error: if S_bound is not empty
     std::transform(std::begin(f_bound), std::end(f_bound), std::begin(counts), std::begin(S_bound), [](const auto p, const auto s) {
-        auto blub =  drawNumberOfSequences(s, p);
-        //auto blub = floor(s*p);
-        //sample die rundung anhand des rests
-        //blub += drawNumberOfSequences(1, (s*p)-floor(s*p));
-        //TODO output entfernen
-        std::cout << "bound p" << p << " Stot "  << " " << s << " " << blub << " " << (s-blub) << " " << round(s*p) - blub<< std::endl;
-        return blub;
+        auto nSeq = drawBinomialNumber(s, p);
+        return nSeq;
     });
 
     //The remaining counts of per species are the unbound
@@ -115,7 +116,6 @@ double UnboundProtein::solve(std::valarray<count_type>& S_bound, std::valarray<c
         //std::cout << i << " " << S_bound[i] << " " << S_unbound[i] << std::endl;
 
     //}
-//    std::cout << "B + bound" << B[0] << " " <<  S_bound.sum() << " " <<  B[0] + S_bound.sum() << " " << B_TOT << std::endl;
 
     return B[0] ;
 }

@@ -13,9 +13,18 @@
 #include <array>
 #include "Utils.hpp"
 #include <math.h>
+
 namespace constants {
     struct Constants {
-        //TODO: muss es überhaupt static heißen? ist constexpr nicht eh static?
+        //static = lifetime during execution (run time);
+        //constexpr value available at compile time -> constant,  (not necessarily run time)
+
+        /***** Constants regarding output *******/
+        //directory where the results and parameter file are stored
+        static const std::string OUTPUT_DIR;
+        //parameter file name never changes
+        static constexpr auto PARAMETER_FILE = "parameters.txt";
+
         /***** Constants regarding kds sampling *******/
         //absolute wildtype Kd
         static constexpr double KD_WT = 1.0;
@@ -76,7 +85,7 @@ namespace constants {
         // Default-constructor is private, to prevent client code from creating new
         // instances of this class. The only instance shall be retrieved through the
         // create_instance() function.
-        //TODO: workaround, 3 mal die gleiche routine aufrufen, weil es erst am  ende alles gespeichert wird
+        //TODO: workaround, 3 mal die gleiche routine (computeMaxMut) aufrufen, weil es erst am  ende alles gespeichert wird, anders lösen?
         Constants(unsigned int length, unsigned int q, double p_mut, double p_error, double p_effect, double p_epistasis) :
                 L(length),PW(length*(length-1)/2), Q(q), P_MUT(p_mut), P_ERR(p_error), P_EFFECT(p_effect), P_EPISTASIS(p_epistasis),
                 MAX_MUT(computeMaxMut(length,p_mut)), NMUT_RANGE(setNMutRange(computeMaxMut(length,p_mut),L)), P_NMUT(setP_NMut(computeMaxMut(length,p_mut),length,p_mut)) {};
