@@ -11,6 +11,9 @@
 
 #include <vector>
 #include <map>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 namespace utils {
     typedef std::map<unsigned int, unsigned int> mutatedPositions;
@@ -25,10 +28,17 @@ namespace utils {
      * Read in parameters from a given parameter file in the given result directory. If there is no file, use default parameters
      * TODO: entweder result ordner angeben als Muss, wo ggf die parameter liste drin ist
      */
-    void readParameters(const std::string &outputPath);
+    void readParameters(const fs::path &outputPath);
 
     /**
-     * Write parameters into parameters.txt file in result directory
+     * TODO noch abfragen, dass nur bei "" in den cout geschrieben werden soll?
+     * Write parameters into a parameter file in the given output path.
+     * If the path does not exist, the parameters are printed into cout
+     */
+    void writeParameters(const fs::path &outputPath);
+
+    /**
+     * Write parameters into cout
      */
     void writeParameters();
 }

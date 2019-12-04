@@ -32,17 +32,18 @@ int main(int argc, const char * argv[]) {
     auto start = std::chrono::high_resolution_clock::now();
 
     //TODO besser Lösung für .. finden
-    std::string outputPath("../results");
+    //std::string
+    fs::path outputPath("../results");
     if(argc > 1) {
         outputPath = argv[1];
     }
 
     if(!fs::exists(outputPath)){
-        fs::path outpath(outputPath);
-        fs::create_directory(outpath);
-        std::cout << "Create output directory " << absolute(outpath).string() << std::endl;
+        //fs::path outpath(outputPath);
+        fs::create_directory(outputPath);
+        std::cout << "Create output directory " << fs::canonical(outputPath) << std::endl;
     } else {
-        std::cout << "Using output directory " << outputPath << std::endl;
+        std::cout << "Using output directory " << fs::canonical(outputPath) << std::endl;
     }
 
     utils::readParameters(outputPath);
@@ -362,31 +363,33 @@ int main(int argc, const char * argv[]) {
     std::cout << "****** Write output to file *******" << std::endl;
     start = std::chrono::high_resolution_clock::now();
 
-    std::filesystem::path outPath =outputPath;
-    if(!fs::exists(outPath));
-        fs::create_directory(outPath);
-    fs::create_directory(outputPath+"/2d");
-    fs::create_directory(outputPath+ "/1d");
-    counter_bound_1d.write_to_file(outputPath +"/1d/"+mut_bound_id+".txt");
-    counter_unbound_1d.write_to_file(outputPath +"/1d/"+mut_unbound_id+".txt");
-    counter_bound_2d.write_to_file(outputPath +"/2d/"+mut_bound_id+".txt");
-    counter_unbound_2d.write_to_file(outputPath +"/2d/"+mut_unbound_id+".txt");
+    if(!fs::exists(outputPath));
+        fs::create_directory(outputPath);
 
-    counter_bound_1d_wt.write_to_file(outputPath +"/1d/"+wt_bound_id+".txt");
-    counter_unbound_1d_wt.write_to_file(outputPath +"/1d/"+wt_unbound_id+".txt");
-    counter_bound_2d_wt.write_to_file(outputPath +"/2d/"+wt_bound_id+".txt");
-    counter_unbound_2d_wt.write_to_file(outputPath +"/2d/"+wt_unbound_id+".txt");
+    //create subdirectories for the single and double mutant counts
+    fs::create_directory(outputPath / "2d");
+    fs::create_directory(outputPath / "1d");
+    //create for each barcode a textfile and write the counts into the files
+    counter_bound_1d.write_to_file(outputPath /"1d" / (mut_bound_id+".txt"));
+    counter_unbound_1d.write_to_file(outputPath / "1d" / (mut_unbound_id+".txt"));
+    counter_bound_2d.write_to_file(outputPath / "2d" / (mut_bound_id+".txt"));
+    counter_unbound_2d.write_to_file(outputPath / "2d" / (mut_unbound_id+".txt"));
+
+    counter_bound_1d_wt.write_to_file(outputPath  / "1d" / (wt_bound_id+".txt"));
+    counter_unbound_1d_wt.write_to_file(outputPath / "1d" / (wt_unbound_id+".txt"));
+    counter_bound_2d_wt.write_to_file(outputPath / "2d" / (wt_bound_id+".txt"));
+    counter_unbound_2d_wt.write_to_file(outputPath / "2d" / (wt_unbound_id+".txt"));
 
     end = std::chrono::high_resolution_clock::now();
     diff = end-start;
     std::cout << "Duration: " << diff.count() << " s\n";
 
     std::cout << "****** Write true values to files *******" << std::endl;
-    effects.writeEpistasisToFile(outputPath+"/pairwise_epistasis.txt");
-    effects.writeKdsToFile(outputPath+"/single_kds.txt");
+    effects.writeEpistasisToFile(outputPath / "pairwise_epistasis.txt");
+    effects.writeKdsToFile(outputPath / "single_kds.txt");
 
     //write pairwise effects: species ids after 1(0 mut), and 2-L+1 (1 mut)
-    std::ofstream outfile(outputPath+"/pairwise_kds.txt");
+    std::ofstream outfile(outputPath / "pairwise_kds.txt");
     if (outfile.good())
     {
 
@@ -403,24 +406,7 @@ int main(int argc, const char * argv[]) {
     std::cout << "****** Write parameter into File *******" << std::endl;
     start = std::chrono::high_resolution_clock::now();
 
-    utils::writeParameters();
-
-    std::ofstream paraOutfile(outputPath+"/parameter.txt");
-
-    if (outfile.good())
-    {
-        paraOutfile << "### paratemers regardin kd sampling ###\n";
-        paraOutfile << "kd_wt\t" <<  cons.KD_WT << '\n';
-        paraOutfile << "p_effect\t" <<  cons.P_EFFECT << '\n';
-        paraOutfile << "p_epistasis\t" <<  cons.P_EPISTASIS << '\n';
-        paraOutfile << "### paramters regardin kd sampling ###\n";
-        paraOutfile << "L\t" <<  cons.L << '\n';
-        paraOutfile << "q\t" <<  cons.Q << '\n';
-        paraOutfile << "M\t" <<  cons.M << '\n';
-        paraOutfile << "p_mut\t" <<  cons.P_MUT << '\n';
-        paraOutfile << "p_error\t" <<  cons.P_ERR << '\n';
-        paraOutfile.close();
-    }
+    utils::writeParameters(cons.OUTPUT_DIR);
 
     end = std::chrono::high_resolution_clock::now();
     diff = end-start;

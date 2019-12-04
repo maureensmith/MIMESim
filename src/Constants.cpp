@@ -64,16 +64,19 @@ namespace constants {
 
     Constants &Constants::get_instance() {
         constexpr unsigned int L_mock = 0;
-        Constants& c = create_instance(L_mock, 0, 0, 0, 0, 0);
+        Constants& c = create_instance(L_mock, 0, 0, 0, 0, 0, std::filesystem::path());
         if(L_mock != c.L)
             return c;
         else
             throw("Singleton not correctly instantiated.");
     }
 
-    Constants& Constants::create_instance(unsigned int length, unsigned int q, double p_mut, double p_error, double p_effect, double p_epistasis){
+    Constants & Constants::create_instance(const unsigned int length, const unsigned int q, const double p_mut,
+                                           const double p_error,
+                                           const double p_effect, const double p_epistasis,
+                                           const fs::path outputDir) {
         //static Constants instance(length);
-        static Constants instance(length, q, p_mut, p_error, p_effect, p_epistasis);
+        static Constants instance(length, q, p_mut, p_error, p_effect, p_epistasis, outputDir);
         return instance;
     }
 }

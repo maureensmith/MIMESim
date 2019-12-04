@@ -13,6 +13,9 @@
 #include <array>
 #include "Utils.hpp"
 #include <math.h>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 namespace constants {
     struct Constants {
@@ -21,7 +24,8 @@ namespace constants {
 
         /***** Constants regarding output *******/
         //directory where the results and parameter file are stored
-        static const std::string OUTPUT_DIR;
+        const fs::path OUTPUT_DIR;
+        //TODO lösche static const std::string OUTPUT_DIR;
         //parameter file name never changes
         static constexpr auto PARAMETER_FILE = "parameters.txt";
 
@@ -66,8 +70,9 @@ namespace constants {
         std::vector<double> setP_NMut(const unsigned int MaxMut, const unsigned L, const double pMut);
         unsigned int computeMaxMut(const unsigned int L, const double pMut);
 
-        static Constants& create_instance(const unsigned int length, const unsigned int q, const double p_mut,
-                                          const double p_error, const double p_effect, const double p_epistasis);
+        static Constants &
+        create_instance(const unsigned int length, const unsigned int q, const double p_mut, const double p_error,
+                        const double p_effect, const double p_epistasis, const fs::path outputDir);
         //static Constants& create_instance(const unsigned int length, const unsigned int q, const double p_mut);
 
         static Constants& get_instance();
@@ -86,9 +91,9 @@ namespace constants {
         // instances of this class. The only instance shall be retrieved through the
         // create_instance() function.
         //TODO: workaround, 3 mal die gleiche routine (computeMaxMut) aufrufen, weil es erst am  ende alles gespeichert wird, anders lösen?
-        Constants(unsigned int length, unsigned int q, double p_mut, double p_error, double p_effect, double p_epistasis) :
+        Constants(unsigned int length, unsigned int q, double p_mut, double p_error, double p_effect, double p_epistasis, fs::path outputDir) :
                 L(length),PW(length*(length-1)/2), Q(q), P_MUT(p_mut), P_ERR(p_error), P_EFFECT(p_effect), P_EPISTASIS(p_epistasis),
-                MAX_MUT(computeMaxMut(length,p_mut)), NMUT_RANGE(setNMutRange(computeMaxMut(length,p_mut),L)), P_NMUT(setP_NMut(computeMaxMut(length,p_mut),length,p_mut)) {};
+                MAX_MUT(computeMaxMut(length,p_mut)), NMUT_RANGE(setNMutRange(computeMaxMut(length,p_mut),L)), P_NMUT(setP_NMut(computeMaxMut(length,p_mut),length,p_mut)), OUTPUT_DIR(outputDir) {};
         //Constants(unsigned int length, unsigned int q, double p_mut) : L(length),PW(L*(L-1)/2), Q(q), P_MUT(p_mut), NMUT_RANGE(setNMutRange()), P_NMUT(setP_NMut()) {};
     };
 }

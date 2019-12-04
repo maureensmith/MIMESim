@@ -11,11 +11,8 @@
 #include <iostream>
 #include <math.h>
 #include <numeric>
-#include <filesystem>
 #include <iostream>
 #include <fstream>
-
-namespace fs = std::filesystem;
 
 //TODO: Utils in DCA packen, da es nicht Benchmark spezifisch ist
 
@@ -125,34 +122,13 @@ namespace utils {
         return mutPos;
     }
 
-    // use only locally
-    static void printParameters() {
-        auto& cons = constants::Constants::get_instance();
-
-        std::cout << std::endl;
-        std::cout << "### paratemers regarding kd sampling ###\n";
-        std::cout << "kd_wt\t" <<  cons.KD_WT << '\n';
-        std::cout << "p_effect\t" <<  cons.P_EFFECT << '\n';
-        std::cout << "p_epistasis\t" <<  cons.P_EPISTASIS << '\n';
-        std::cout << "### paramters regarding sequence sampling ###\n";
-        std::cout << "L\t" <<  cons.L << '\n';
-        std::cout << "q\t" <<  cons.Q << '\n';
-        std::cout << "M\t" <<  cons.M << '\n';
-        std::cout << "p_mut\t" <<  cons.P_MUT << '\n';
-        std::cout << "p_error\t" <<  cons.P_ERR << '\n';
-        std::cout << std::endl;
-    }
-
-
-    void readParameters(const std::string &outputPath){
+    void readParameters(const fs::path &outputPath){
 
         // if output directory does not exist yet, create it
         if(!fs::exists(outputPath)){
-            fs::path outpath(outputPath);
-            fs::create_directory(outpath);
-            std::cout << "Create output directory " << absolute(outpath).string() << std::endl;
+            fs::create_directory(outputPath);
+            std::cout << "Create output directory " << fs::canonical(outputPath) << std::endl;
         }
-
 
         // dafault parameters, in case no file is given, or paramater are not set in the file
         //TODO If L is big, the id range gets really high -> long statt int. if any error, look for to high ints
@@ -167,17 +143,16 @@ namespace utils {
         double p_epistasis = 0.3;
         //unsigned int M = 12 * pow(10, 6);
 
-        const fs::path paraFile = outputPath+"/parameter.txt";
+        const fs::path paraFile(fs::canonical(outputPath) / constants::Constants::PARAMETER_FILE);
         // if the output directory contains the parameter file, read it
         if(fs::exists(paraFile) && fs::is_regular_file(paraFile)) {
-            std::ifstream infile(paraFile.string());
-
+            //Paths are implicitly convertible to and from std::basic_strings, so we can call
+            std::ifstream infile(paraFile);
             if (infile.good()) {
-                std::cout << "Reading file " << paraFile.string();
+                std::cout << "Reading file " << paraFile << std::endl;
                 std::string line;
                 std::string param;
                 std::string val;
-
 
                 try {
 
@@ -222,31 +197,46 @@ namespace utils {
         }
 
         // Create constants which are used through out this test set
-        constants::Constants& cons = constants::Constants::create_instance(L, q, p_mut, p_error, p_effect, p_epistasis);
-        printParameters();
+        constants::Constants& cons = constants::Constants::create_instance(L, q, p_mut, p_error, p_effect, p_epistasis,
+                                                                           outputPath);
+        writeParameters();
+    }
+
+
+    void writeParameters(const fs::path &outputPath) {
+
+        auto& cons = constants::Constants::get_instance();
+
+        //initialize the stream with the
+        std::ostream* paraStream = &std::cout;
+        std::ofstream ofs;
+
+        if (fs::exists(outputPath) && fs::is_directory(outputPath)) {
+            auto paraFile(outputPath / cons.PARAMETER_FILE);
+            std::cout << "Parameter File: " << fs::canonical(outputPath) << std::endl;
+            ofs.open(paraFile);
+            paraStream = &ofs;
+        }
+
+        if ((*paraStream).good())
+        {
+            (*paraStream) << "### paratemers regarding kd sampling ###\n";
+            (*paraStream) << "kd_wt\t" <<  cons.KD_WT << '\n';
+            (*paraStream) << "p_effect\t" <<  cons.P_EFFECT << '\n';
+            (*paraStream) << "p_epistasis\t" <<  cons.P_EPISTASIS << '\n';
+            (*paraStream) << "### paramters regarding sequence sampling ###\n";
+            (*paraStream) << "L\t" <<  cons.L << '\n';
+            (*paraStream) << "q\t" <<  cons.Q << '\n';
+            (*paraStream) << "M\t" <<  cons.M << '\n';
+            (*paraStream) << "p_mut\t" <<  cons.P_MUT << '\n';
+            (*paraStream) << "p_error\t" <<  cons.P_ERR << '\n';
+            //paraOutStream.close();
+        }
     }
 
 
     void writeParameters() {
-
-        auto& cons = constants::Constants::get_instance();
-
-        std::ofstream paraOutfile(cons.PARAMETER_FILE);
-
-        if (paraOutfile.good())
-        {
-            paraOutfile << "### paratemers regarding kd sampling ###\n";
-            paraOutfile << "kd_wt\t" <<  cons.KD_WT << '\n';
-            paraOutfile << "p_effect\t" <<  cons.P_EFFECT << '\n';
-            paraOutfile << "p_epistasis\t" <<  cons.P_EPISTASIS << '\n';
-            paraOutfile << "### paramters regarding sequence sampling ###\n";
-            paraOutfile << "L\t" <<  cons.L << '\n';
-            paraOutfile << "q\t" <<  cons.Q << '\n';
-            paraOutfile << "M\t" <<  cons.M << '\n';
-            paraOutfile << "p_mut\t" <<  cons.P_MUT << '\n';
-            paraOutfile << "p_error\t" <<  cons.P_ERR << '\n';
-            paraOutfile.close();
-        }
+        writeParameters("");
     }
 
 }
