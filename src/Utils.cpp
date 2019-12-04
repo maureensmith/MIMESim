@@ -122,84 +122,94 @@ namespace utils {
         return mutPos;
     }
 
-    void readParameters(const fs::path &outputPath){
+    void readParameters(const fs::path &outputPath) {
 
-        // if output directory does not exist yet, create it
-        if(!fs::exists(outputPath)){
-            fs::create_directory(outputPath);
-            std::cout << "Create output directory " << fs::canonical(outputPath) << std::endl;
-        }
-
-        // dafault parameters, in case no file is given, or paramater are not set in the file
-        //TODO If L is big, the id range gets really high -> long statt int. if any error, look for to high ints
-        //sequence length
-        unsigned int L = 50;
-        // symbols per position
-        unsigned int q = 2;
-        //mutation probability
-        double p_mut = 0.1;
-        double p_error = p_mut / 10.0;
-        double p_effect = 0.5;
-        double p_epistasis = 0.3;
-        //unsigned int M = 12 * pow(10, 6);
-
-        const fs::path paraFile(fs::canonical(outputPath) / constants::Constants::PARAMETER_FILE);
-        // if the output directory contains the parameter file, read it
-        if(fs::exists(paraFile) && fs::is_regular_file(paraFile)) {
-            //Paths are implicitly convertible to and from std::basic_strings, so we can call
-            std::ifstream infile(paraFile);
-            if (infile.good()) {
-                std::cout << "Reading file " << paraFile << std::endl;
-                std::string line;
-                std::string param;
-                std::string val;
-
-                try {
-
-                    while (std::getline(infile, line)) {
-
-                        //stream through each line to read the parameter name and its value, seperated by tabular
-                        std::istringstream lineSS(line);
-
-                        std::getline(lineSS, param, '\t');
-                        std::getline(lineSS, val, '\t');
-                        //TODO ist erstmal fest auf 1.0 gesetzt und M auf 12 Mio
-                        //if(param == "kd_wt")
-                        //    kd_wt = std::stoi(val);
-                        //if(param == "M")
-                        //    M = std:stoi(val);
-                        if (param == "L")
-                            L = std::stoi(val);
-                        if (param == "q")
-                            q = std::stoi(val);
-                        if (param == "p_mut")
-                            p_mut = std::stod(val);
-                        if (param == "p_error")
-                            p_error = std::stod(val);
-                        if (param == "p_effect")
-                            p_effect = std::stod(val);
-                        if (param == "p_epistasis")
-                            p_epistasis = std::stod(val);
-                    }
-                    infile.close();
-                    std::cout << " ... successful." << std::endl;
-                }  catch (const std::invalid_argument& ia) {
-                    //TODO anders mit umgehen?
-                    std::cerr << "Error in parameter file. Invalid argument for parameter " << param << " ("<< ia.what() << ")"<< '\n';
-                    std::cout << "Using default parameters." << std::endl;
-                }
+        if (!outputPath.empty()) {
+            // if output directory does not exist yet, create it
+            if (!fs::exists(outputPath)) {
+                fs::create_directory(outputPath);
+                std::cout << "Create output directory " << fs::canonical(outputPath) << std::endl;
             }
-        } else {
-            //...if no config file is given, create the constants with the default parameter values
-            std::cout << "No parameter file given. Using default parameters." << std::endl;
-            //TODO so oder so noch die parameter ausgeben.
-            //TODO test case für parameter einlesen
-        }
 
-        // Create constants which are used through out this test set
-        constants::Constants& cons = constants::Constants::create_instance(L, q, p_mut, p_error, p_effect, p_epistasis,
-                                                                           outputPath);
-        writeParameters();
+            // dafault parameters, in case no file is given, or paramater are not set in the file
+            //TODO If L is big, the id range gets really high -> long statt int. if any error, look for to high ints
+            //sequence length
+            unsigned int L = 50;
+            // symbols per position
+            unsigned int q = 2;
+            //mutation probability
+            double p_mut = 0.1;
+            double p_error = p_mut / 10.0;
+            double p_effect = 0.5;
+            double p_epistasis = 0.3;
+            //unsigned int M = 12 * pow(10, 6);
+
+            const fs::path paraFile(fs::canonical(outputPath) / constants::Constants::PARAMETER_FILE);
+            // if the output directory contains the parameter file, read it
+            if (fs::exists(paraFile) && fs::is_regular_file(paraFile)) {
+                //Paths are implicitly convertible to and from std::basic_strings, so we can call
+                std::ifstream infile(paraFile);
+                if (infile.good()) {
+                    std::cout << "Reading file " << paraFile << std::endl;
+                    std::string line;
+                    std::string param;
+                    std::string val;
+
+                    try {
+
+                        while (std::getline(infile, line)) {
+
+                            //stream through each line to read the parameter name and its value, seperated by tabular
+                            std::istringstream lineSS(line);
+
+                            std::getline(lineSS, param, '\t');
+                            std::getline(lineSS, val, '\t');
+                            //TODO ist erstmal fest auf 1.0 gesetzt und M auf 12 Mio
+                            //if(param == "kd_wt")
+                            //    kd_wt = std::stoi(val);
+                            //if(param == "M")
+                            //    M = std:stoi(val);
+                            if (param == "L")
+                                L = std::stoi(val);
+                            if (param == "q")
+                                q = std::stoi(val);
+                            if (param == "p_mut")
+                                p_mut = std::stod(val);
+                            if (param == "p_error")
+                                p_error = std::stod(val);
+                            if (param == "p_effect")
+                                p_effect = std::stod(val);
+                            if (param == "p_epistasis")
+                                p_epistasis = std::stod(val);
+                        }
+                        infile.close();
+                        std::cout << " ... successful." << std::endl;
+                    } catch (const std::invalid_argument &ia) {
+                        //TODO anders mit umgehen?
+                        std::cerr << "Error in parameter file. Invalid argument for parameter " << param << " ("
+                                  << ia.what() << ")" << '\n';
+                        std::cout << "Using default parameters." << std::endl;
+                    }
+                }
+            } else {
+                //...if no config file is given, create the constants with the default parameter values
+                std::cout << "No parameter file given. Using default parameters." << std::endl;
+                //TODO so oder so noch die parameter ausgeben.
+                //TODO test case für parameter einlesen
+            }
+
+            // Create constants which are used through out this test set
+            constants::Constants &cons = constants::Constants::create_instance(L, q, p_mut, p_error, p_effect,
+                                                                               p_epistasis,
+
+                                                                               outputPath);
+            writeParameters();
+        } else {
+            //TODO throw exception
+            std::cerr << "Output path is a mandatory parameter" << std::endl;
+            throw std::invalid_argument("Output path is a mandatory parameter");
+            //std::exit(1);
+        }
     }
 
 

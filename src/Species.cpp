@@ -171,7 +171,7 @@ namespace species
         std::default_random_engine generator (seed);
 
         // Break down the drawing of all possible (allowed) species ids into 2 smaller ones:
-        //first draw a the number of mutations from 0 to MAX_MUT, with the given probabiliteis...
+        //first draw a the number of mutations from 0 to MAX_MUT, with the given probabilities...
         std::discrete_distribution<> d(begin(constants.P_NMUT), end(constants.P_NMUT));
         //then draw uniformly the id from the id range for this particular number of mutations
         std::vector<std::uniform_int_distribution<>> unif(constants.MAX_MUT);
