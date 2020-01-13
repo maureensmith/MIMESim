@@ -31,8 +31,6 @@ int main(int argc, const char * argv[]) {
     //measuring realtime duration (see std::clock for cpu time)
     auto start = std::chrono::high_resolution_clock::now();
 
-    //TODO besser Lösung für .. finden
-    //std::string
     fs::path outputPath("../results");
     if(argc > 1) {
         outputPath = argv[1];
@@ -71,12 +69,15 @@ int main(int argc, const char * argv[]) {
 
     // Create Ground Truth: Effects of each mutated position and epistatic effects and sequencing noise
     FunctionalSequence& effects = FunctionalSequence::get_instance();
-    std::vector<Mutation> mutationsPerPos_vec;
-    mutationsPerPos_vec.reserve(cons.L);
-    for(int i = 1; i<=cons.L; ++i) {
-        //create instance for each
-        mutationsPerPos_vec.emplace_back(i, effects.getKd(i));
-    }
+    //TODO hiermit geschieht ja garnix??? muss ich die überhaupt erstellen?
+//    std::vector<Mutation> mutationsPerPos_vec;
+//    mutationsPerPos_vec.reserve(cons.L);
+//    for(int i = 1; i<=cons.L; ++i) {
+//        // there are q-1 possible mutations
+//        for(int j = 1; j<cons.Q; ++j)
+//        //create instance for each
+//        mutationsPerPos_vec.emplace_back(i, j, effects.getKd(i));
+//    }
 
     end = std::chrono::high_resolution_clock::now();
     diff = end-start;
@@ -84,24 +85,38 @@ int main(int argc, const char * argv[]) {
 
     std::cout << "****** Create species *******" << std::endl;
     start = std::chrono::high_resolution_clock::now();
-    // Create M species
+    std::cout << "------ draw species ids -------" << std::endl;// Create M species, the map contains the counts for each sampled sequence id
     auto specId_map = species::drawSpeciesIds();
+
+    end = std::chrono::high_resolution_clock::now();
+    diff = end-start;
+    std::cout << "Duration: " << diff.count() << " s\n";
     //std::vector<species::Species> species_vec;
-    species::species_map species_vec;
+
+    std::cout << "------ crate species vector -------" << std::endl;
     //species_vec.reserve(specId_map.size());
-    for(auto it = specId_map.begin(); it != specId_map.end(); ++it) {
-        // creates object directly in vector (instead of creating & moving), calling constr with given parameter
+
+    //TODO weg damit
+    std::cout << sizeof (species::Species) << std::endl;
+    std::cout << sizeof (species::Species) * specId_map.size() << std::endl;
+
+    //TODO how about undordered map?
+    species::species_map species_vec;
+
+    for(auto specIdCountIt = specId_map.begin(); specIdCountIt != specId_map.end(); ++specIdCountIt) {
+        // creates object directly in vector (instead of creating & moving), calling constr with given parameter.
+        //the id is the key for the map, and also the parameter for the constructor for the species class
                 //TODO: emplace_hint
-        auto currentObj = species_vec.emplace(it->first, it->first);
+        auto currentObj = species_vec.emplace(specIdCountIt->first, specIdCountIt->first);
         // first is a pointer to just constructed pair, second is the species object to call the methods
-        currentObj.first->second.setCount(it->second);
+        currentObj.first->second.setCount(specIdCountIt->second);
         currentObj.first->second.computeSpeciesKd();
-        //species_vec.emplace_back(it->first);
-        //species_vec.back().setCount(it->second);
-        ////species_vec.back().setErrors(it->second[1]);
-        ////species_vec.back().setFreq(it->second[0]/double(cons.M));
+        //species_vec.emplace_back(specIdCountIt->first);
+        //species_vec.back().setCount(specIdCountIt->second);
+        ////species_vec.back().setErrors(specIdCountIt->second[1]);
+        ////species_vec.back().setFreq(specIdCountIt->second[0]/double(cons.M));
         //species_vec.back().computeSpeciesKd();
-        //std::cout << "id " << it->first << " nummut " << species_vec.at(it->first).getNumMut() << " counts " << it->second  << std::endl;
+        //std::cout << "id " << specIdCountIt->first << " nummut " << species_vec.at(specIdCountIt->first).getNumMut() << " counts " << specIdCountIt->second  << std::endl;
     }
     //TODO: diese Art der Abfrage in die Tests packen
 //    std::cout << "wt species count + freq. " << species_vec.at(1).getCount() << " " << species_vec.at(1).getFreq() << std::endl;
@@ -117,6 +132,7 @@ int main(int argc, const char * argv[]) {
     start = std::chrono::high_resolution_clock::now();
     //auto wtSpecId_map = species::drawWildtypeErrors();
     //std::vector<species::Species> wtSpecies_vec;
+    //The "control expereriment / wild type library" contains only wildtype sequences
     species::species_map wtSpecies_vec;
     auto currentObj = wtSpecies_vec.emplace(1, 1);
     currentObj.first->second.setCount(cons.M);
@@ -175,7 +191,7 @@ int main(int argc, const char * argv[]) {
 
     std::cout << "****** Count Mut Library *******" << std::endl;
     start = std::chrono::high_resolution_clock::now();
-    // create reference (here only As, Cs are mutations)
+    // create reference (here only As, Cs Gs and Us are mutations)
     ref::reference ref;
     ref::ref_map wt_read;
     wt_read.reserve(cons.L);
@@ -218,6 +234,9 @@ int main(int argc, const char * argv[]) {
         counter_bound_1d.count(spec.second.getRead(), times_bound);
         counter_unbound_1d.count(spec.second.getRead(), times_unbound);
 
+        counter_bound_2d.count(spec.second.getRead(), times_bound);
+        counter_unbound_2d.count(spec.second.getRead(), times_unbound);
+
         //if (spec.first < 100) {
             //std::cout << "id " << spec.first << " countTot " << spec.second.getCount() << " bound " << times_bound
             //      << " unbound " << times_unbound << std::endl;
@@ -225,43 +244,43 @@ int main(int argc, const char * argv[]) {
             //          << " " << double(times_bound)/spec.second.getCount()  <<std::endl;
         //}
 
-        for(auto pos1:spec.second.getMutatedPositions()) {
-
-            //.... substract the ones where position 1 is mutated, and count as wt mut
-            for(unsigned pos2=1; pos2<=cons.L; ++pos2) {
-                if (pos1 < pos2) {
-                    counter_bound_2d.count(pos1, pos2, 'A', 'A', -times_bound);
-                    counter_bound_2d.count(pos1, pos2, 'C', 'A', times_bound);
-                    counter_unbound_2d.count(pos1, pos2, 'A', 'A', -times_unbound);
-                    counter_unbound_2d.count(pos1, pos2, 'C', 'A', times_unbound);
-                } else if(pos1 > pos2) {
-                    counter_bound_2d.count(pos2, pos1, 'A', 'A', -times_bound);
-                    counter_bound_2d.count(pos2, pos1, 'A', 'C', times_bound);
-                    counter_unbound_2d.count(pos2, pos1, 'A', 'A', -times_unbound);
-                    counter_unbound_2d.count(pos2, pos1, 'A', 'C', times_unbound);
-                }
-            }
-            //... substruct again from the wt mut, and at for mut mut... as this vector is very short anyway (max 4 or 5)
-            for(auto pos2:spec.second.getMutatedPositions()) {
-                if (pos1 < pos2) {
-                    counter_bound_2d.count(pos1, pos2, 'C', 'A', -times_bound);
-                    counter_bound_2d.count(pos1, pos2, 'A', 'C', -times_bound);
-                    counter_bound_2d.count(pos1, pos2, 'C', 'C', times_bound);
-                    counter_unbound_2d.count(pos1, pos2, 'C', 'A', -times_unbound);
-                    counter_unbound_2d.count(pos1, pos2, 'A', 'C', -times_unbound);
-                    counter_unbound_2d.count(pos1, pos2, 'C', 'C', times_unbound);
-                }
-
-                //TODO: hier wird doppelt gezählt, da ich 2 mal durch alle mutierten positionen gehe -> WEG
-//                else if(pos1 > pos2) {
-//                    counter_bound_2d.count(pos2, pos1, 'A', 'C', -times_bound);
-//                    counter_bound_2d.count(pos2, pos1, 'C', 'C', times_bound);
-//                    counter_unbound_2d.count(pos2, pos1, 'A', 'C', -times_unbound);
-//                    counter_unbound_2d.count(pos2, pos1, 'C', 'C', times_unbound);
+//        for(auto mut1:spec.second.getMutatedPositions()) {
+//
+//            //.... substract the ones where position 1 is mutated, and count as wt mut
+//            for(unsigned mut2=1; mut2 <= cons.L; ++mut2) {
+//                if (mut1.getPosition() < mut2) {
+//                    counter_bound_2d.count(mut1, mut2, 'A', 'A', -times_bound);
+//                    counter_bound_2d.count(mut1, mut2, 'C', 'A', times_bound);
+//                    counter_unbound_2d.count(mut1, mut2, 'A', 'A', -times_unbound);
+//                    counter_unbound_2d.count(mut1, mut2, 'C', 'A', times_unbound);
+//                } else if(mut1 > mut2) {
+//                    counter_bound_2d.count(mut2, mut1, 'A', 'A', -times_bound);
+//                    counter_bound_2d.count(mut2, mut1, 'A', 'C', times_bound);
+//                    counter_unbound_2d.count(mut2, mut1, 'A', 'A', -times_unbound);
+//                    counter_unbound_2d.count(mut2, mut1, 'A', 'C', times_unbound);
 //                }
-            }
-
-        }
+//            }
+//            //... substruct again from the wt mut, and at for mut mut... as this vector is very short anyway (max 4 or 5)
+//            for(auto pos2:spec.second.getMutatedPositions()) {
+//                if (mut1 < pos2) {
+//                    counter_bound_2d.count(mut1, pos2, 'C', 'A', -times_bound);
+//                    counter_bound_2d.count(mut1, pos2, 'A', 'C', -times_bound);
+//                    counter_bound_2d.count(mut1, pos2, 'C', 'C', times_bound);
+//                    counter_unbound_2d.count(mut1, pos2, 'C', 'A', -times_unbound);
+//                    counter_unbound_2d.count(mut1, pos2, 'A', 'C', -times_unbound);
+//                    counter_unbound_2d.count(mut1, pos2, 'C', 'C', times_unbound);
+//                }
+//
+//                //TODO: hier wird doppelt gezählt, da ich 2 mal durch alle mutierten positionen gehe -> WEG
+////                else if(mut1 > pos2) {
+////                    counter_bound_2d.count(pos2, mut1, 'A', 'C', -times_bound);
+////                    counter_bound_2d.count(pos2, mut1, 'C', 'C', times_bound);
+////                    counter_unbound_2d.count(pos2, mut1, 'A', 'C', -times_unbound);
+////                    counter_unbound_2d.count(pos2, mut1, 'C', 'C', times_unbound);
+////                }
+//            }
+//
+//        }
 
         //counter_bound_2d.count(spec.second.getRead(), spec.second.getMutCountBound() + spec.second.getErrorCountBound());
         //counter_unbound_2d.count(spec.second.getRead(), spec.second.getMutCountUnbound() + spec.second.getErrorCountUnbound());
@@ -306,6 +325,9 @@ int main(int argc, const char * argv[]) {
         counter_bound_1d_wt.count(spec.second.getRead(), times_bound);
         counter_unbound_1d_wt.count(spec.second.getRead(), times_unbound);
 
+        counter_bound_2d_wt.count(spec.second.getRead(), times_bound);
+        counter_unbound_2d_wt.count(spec.second.getRead(), times_unbound);
+
 //        if (spec.first < 100) {
 //        std::cout << "id " << spec.first << " countTot " << spec.second.getCount() << " bound " << times_bound
 //              << " unbound " << times_unbound << std::endl;
@@ -313,41 +335,41 @@ int main(int argc, const char * argv[]) {
 //            std::cout << " unbound mut " << spec.second.getMutCountUnbound() <<  " unbound err " << spec.second.getErrorCountUnbound() << std::endl;
 //        }
 
-        for(auto pos1:spec.second.getMutatedPositions()) {
-
-            for(unsigned pos2=1; pos2<=cons.L; ++pos2) {
-                if (pos1 < pos2) {
-                    counter_bound_2d_wt.count(pos1, pos2, 'A', 'A', -times_bound);
-                    counter_bound_2d_wt.count(pos1, pos2, 'C', 'A', times_bound);
-                    counter_unbound_2d_wt.count(pos1, pos2, 'A', 'A', -times_unbound);
-                    counter_unbound_2d_wt.count(pos1, pos2, 'C', 'A', times_unbound);
-                } else if(pos1 > pos2) {
-                    counter_bound_2d_wt.count(pos2, pos1, 'A', 'A', -times_bound);
-                    counter_bound_2d_wt.count(pos2, pos1, 'A', 'C', times_bound);
-                    counter_unbound_2d_wt.count(pos2, pos1, 'A', 'A', -times_unbound);
-                    counter_unbound_2d_wt.count(pos2, pos1, 'A', 'C', times_unbound);
-                }
-            }
-            for(auto pos2:spec.second.getMutatedPositions()) {
-                if (pos1 < pos2) {
-                    counter_bound_2d_wt.count(pos1, pos2, 'C', 'A', -times_bound);
-                    counter_bound_2d_wt.count(pos1, pos2, 'A', 'C', -times_bound);
-                    counter_bound_2d_wt.count(pos1, pos2, 'C', 'C', times_bound);
-                    counter_unbound_2d_wt.count(pos1, pos2, 'C', 'A', -times_unbound);
-                    counter_unbound_2d_wt.count(pos1, pos2, 'A', 'C', -times_unbound);
-                    counter_unbound_2d_wt.count(pos1, pos2, 'C', 'C', times_unbound);
-                }
-
-                //TODO: s.o.
-//                else if(pos1 > pos2) {
-//                    counter_bound_2d_wt.count(pos2, pos1, 'A', 'C', -times_bound);
-//                    counter_bound_2d_wt.count(pos2, pos1, 'C', 'C', times_bound);
-//                    counter_unbound_2d_wt.count(pos2, pos1, 'A', 'C', -times_unbound);
-//                    counter_unbound_2d_wt.count(pos2, pos1, 'C', 'C', times_unbound);
+//        for(auto pos1:spec.second.getMutatedPositions()) {
+//
+//            for(unsigned pos2=1; pos2<=cons.L; ++pos2) {
+//                if (pos1 < pos2) {
+//                    counter_bound_2d_wt.count(pos1, pos2, 'A', 'A', -times_bound);
+//                    counter_bound_2d_wt.count(pos1, pos2, 'C', 'A', times_bound);
+//                    counter_unbound_2d_wt.count(pos1, pos2, 'A', 'A', -times_unbound);
+//                    counter_unbound_2d_wt.count(pos1, pos2, 'C', 'A', times_unbound);
+//                } else if(pos1 > pos2) {
+//                    counter_bound_2d_wt.count(pos2, pos1, 'A', 'A', -times_bound);
+//                    counter_bound_2d_wt.count(pos2, pos1, 'A', 'C', times_bound);
+//                    counter_unbound_2d_wt.count(pos2, pos1, 'A', 'A', -times_unbound);
+//                    counter_unbound_2d_wt.count(pos2, pos1, 'A', 'C', times_unbound);
 //                }
-            }
-
-        }
+//            }
+//            for(auto pos2:spec.second.getMutatedPositions()) {
+//                if (pos1 < pos2) {
+//                    counter_bound_2d_wt.count(pos1, pos2, 'C', 'A', -times_bound);
+//                    counter_bound_2d_wt.count(pos1, pos2, 'A', 'C', -times_bound);
+//                    counter_bound_2d_wt.count(pos1, pos2, 'C', 'C', times_bound);
+//                    counter_unbound_2d_wt.count(pos1, pos2, 'C', 'A', -times_unbound);
+//                    counter_unbound_2d_wt.count(pos1, pos2, 'A', 'C', -times_unbound);
+//                    counter_unbound_2d_wt.count(pos1, pos2, 'C', 'C', times_unbound);
+//                }
+//
+//                //TODO: s.o.
+////                else if(pos1 > pos2) {
+////                    counter_bound_2d_wt.count(pos2, pos1, 'A', 'C', -times_bound);
+////                    counter_bound_2d_wt.count(pos2, pos1, 'C', 'C', times_bound);
+////                    counter_unbound_2d_wt.count(pos2, pos1, 'A', 'C', -times_unbound);
+////                    counter_unbound_2d_wt.count(pos2, pos1, 'C', 'C', times_unbound);
+////                }
+//            }
+//
+//        }
 
     }
 

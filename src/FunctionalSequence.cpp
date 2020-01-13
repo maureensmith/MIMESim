@@ -4,6 +4,7 @@
 
 #include "FunctionalSequence.hpp"
 #include "Constants.hpp"
+#include "Species.hpp"
 #include <random>
 #include <chrono>
 #include <iostream>
@@ -12,7 +13,7 @@
 
 std::vector<double> FunctionalSequence::drawKdValues() {
     auto& constants = constants::Constants::get_instance();
-    std::vector<double> kds(constants.L);
+    std::vector<double> kds(constants.SVal);
     const auto seed = static_cast<unsigned int>(std::chrono::system_clock::now().time_since_epoch().count());
     std::default_random_engine generator(seed);
     std::bernoulli_distribution bd(constants.P_EFFECT);
@@ -26,7 +27,7 @@ std::vector<double> FunctionalSequence::drawKdValues() {
 
 std::vector<double> FunctionalSequence::drawEpistasis() {
     auto& constants = constants::Constants::get_instance();
-    std::vector<double> epistasis(constants.PW);
+    std::vector<double> epistasis(constants.PWVal);
     const auto seed = static_cast<unsigned int>(std::chrono::system_clock::now().time_since_epoch().count());
     std::default_random_engine generator(seed);
     std::bernoulli_distribution bd(constants.P_EPISTASIS);
@@ -44,25 +45,37 @@ FunctionalSequence& FunctionalSequence::get_instance(){
     return instance;
 }
 
-const double &FunctionalSequence::getKd(const unsigned int i) {
-    //TODO abfangen
-    if(i>0 && i<=kds.size())
-        return kds[i-1];
-    else
-       std::cerr << "TODO: Fehler Abfangen";
+const double FunctionalSequence::getKd(const Mutation& p) {
+    return kds.at(p.getPosition()+p.getSymbol()-1);
 }
 
-unsigned int FunctionalSequence::getMatrixVectorIndex(unsigned int i, unsigned int j) {
+//TODO test
+unsigned int FunctionalSequence::getMatrixVectorIndex(const Mutation& a, const Mutation& b) {
     auto& c = constants::Constants::get_instance();
+
+    //TODO weg damit nach test?
     //i must always be smaller than j
-    //TODO abfangen wenn i == j
-    if(i > j) {
-        unsigned int k = j;
-        j=i;
-        i=k;
-    }
+//    if(pos1 > pos2) {
+//        auto k = pos2;
+//        auto l = mut2;
+//        pos2=pos1;
+//        pos1=k;
+//        mut2=mut1;
+//        mut1=l;
+//    }
     //same as in R mut -1 because index starts at 0
-    unsigned int res = (c.L*(c.L-1)/2) - ((c.L-i+1)*((c.L-i+1)-1)/2) + j - i - 1;
+    //for the index calculation, the positions have to be in ascending order
+    //unsigned int res = (c.L*(c.L-1)/2) - ((c.L-i+1)*((c.L-i+1)-1)/2) + j - i - 1;
+    //TODO oha... determine the id of the sequence with pairwise mutations and substract the ID range for the sequences with no or 1 mutation
+    unsigned int res;
+    if(a.getPosition() < b.getPosition())
+        //TODO diese Funktionen woanders hin als in Species? Eigentlich hat Species ja nichts mit Functional Sequence zu tun
+        res = species::mutPosToSpecIdx({a,b}) - c.NMUT_RANGE.at(1)-1;
+    else if(a.getPosition() > b.getPosition())
+        res = species::mutPosToSpecIdx({b,a}) - c.NMUT_RANGE.at(1)-1;
+    else
+        //TODO throw exception for i == j?
+        std::cerr << "Two mutations at the same position are not possible.";
 
     return res;
 }
@@ -90,8 +103,8 @@ void FunctionalSequence::writeEpistasisToFile(const std::string& filename) {
     }
 }
 
-const double &FunctionalSequence::getEpistasis(const unsigned int i, const unsigned int j) {
-    return epistasis[FunctionalSequence::getMatrixVectorIndex(i, j)];
+const double &FunctionalSequence::getEpistasis(const Mutation& a, const Mutation& b) {
+    return epistasis.at(FunctionalSequence::getMatrixVectorIndex(a, b));
 }
 
 const std::vector<double> &FunctionalSequence::getKd() {

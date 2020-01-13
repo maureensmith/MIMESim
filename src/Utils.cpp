@@ -53,6 +53,7 @@ namespace utils {
     }
 
 
+    //TODO ist das nicht schon in Species? Welches ist jetzt besser??
     mutatedPositions specIdxToMutPos(const unsigned long specIdx, const unsigned int L, const unsigned int numSymbols,
                                      const std::vector<unsigned int> &nMutRange) {
         mutatedPositions mutPos{};
@@ -122,6 +123,7 @@ namespace utils {
         return mutPos;
     }
 
+
     void readParameters(const fs::path &outputPath) {
 
         if (!outputPath.empty()) {
@@ -129,6 +131,13 @@ namespace utils {
             if (!fs::exists(outputPath)) {
                 fs::create_directory(outputPath);
                 std::cout << "Create output directory " << fs::canonical(outputPath) << std::endl;
+            }
+
+            fs::path paraFile(fs::canonical(outputPath));
+
+            // the path can either be a directory, where the parameter file has the standard name, or it the path contains a given parameter file
+            if(fs::is_directory(outputPath)) {
+                paraFile = (fs::canonical(outputPath) / constants::Constants::PARAMETER_FILE);
             }
 
             // dafault parameters, in case no file is given, or paramater are not set in the file
@@ -144,7 +153,6 @@ namespace utils {
             double p_epistasis = 0.3;
             //unsigned int M = 12 * pow(10, 6);
 
-            const fs::path paraFile(fs::canonical(outputPath) / constants::Constants::PARAMETER_FILE);
             // if the output directory contains the parameter file, read it
             if (fs::exists(paraFile) && fs::is_regular_file(paraFile)) {
                 //Paths are implicitly convertible to and from std::basic_strings, so we can call
@@ -201,7 +209,6 @@ namespace utils {
             // Create constants which are used through out this test set
             constants::Constants &cons = constants::Constants::create_instance(L, q, p_mut, p_error, p_effect,
                                                                                p_epistasis,
-
                                                                                outputPath);
             writeParameters();
         } else {

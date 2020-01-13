@@ -12,6 +12,10 @@
 #include <iostream>
 
 namespace constants {
+
+    // Initialize static member inited
+    bool Constants::inited = false;
+
     // separate definitions for static constexpr need to be placed out of the class to enable linkage
     constexpr double Constants::KD_WT;
     //constexpr double Constants::P_EFFECT;
@@ -31,15 +35,28 @@ namespace constants {
         return maxMut;
     }
 
-    //std::array<unsigned int, Constants::MAX_MUT+1> Constants::setNMutRange() {
-    std::vector<unsigned int> Constants::setNMutRange(const unsigned int maxMut, const unsigned int L) {
+    //TODO löschen
+//    //std::array<unsigned int, Constants::MAX_MUT+1> Constants::setNMutRange() {
+//    std::vector<unsigned int> Constants::setNMutRange(const unsigned int maxMut, const unsigned int L) {
+//        //compute the number of possible sequence for 0..MAX_MUT mutations, the cumulative sum gives the id range for each number of mutations
+//        //TODO mal ausporbieren wenn ich mehr error erlaube, also einfach nur die größere range für spätere eror id berechnung
+//        std::vector<unsigned int> nMutRange(maxMut*2+1);
+//        //std::array<unsigned int, MAX_MUT+1> nMutRange;
+//        nMutRange[0] = 1;
+//        for(unsigned int i = 1; i<=maxMut*2; ++i) {
+//            nMutRange[i] = nMutRange[i - 1] + utils::nChoosek(L, i);
+//        }
+//        return(nMutRange);
+//    }
+
+    std::vector<unsigned int> Constants::setNMutRange(const unsigned int maxMut, const unsigned int L, const unsigned int q) {
         //compute the number of possible sequence for 0..MAX_MUT mutations, the cumulative sum gives the id range for each number of mutations
-        //TODO mal ausporbieren wenn ich mehr error erlaube, also einfach nur die größere range für spätere eror id berechnung
+        //larger range for adding errors (i.e. more mutated positions)
         std::vector<unsigned int> nMutRange(maxMut*2+1);
-        //std::array<unsigned int, MAX_MUT+1> nMutRange;
         nMutRange[0] = 1;
         for(unsigned int i = 1; i<=maxMut*2; ++i) {
-            nMutRange[i] = nMutRange[i - 1] + utils::nChoosek(L, i);
+            //cummulative sum of L choose i position combinations and (q-1)^i symbol combinations
+            nMutRange[i] = nMutRange[i - 1] + utils::nChoosek(L, i) * pow(q-1, i);
         }
         return(nMutRange);
     }
@@ -58,17 +75,29 @@ namespace constants {
             p_nmut[i] = utils::nChoosek(L, i)* pow(pMut,i)*pow(1-pMut,L-i);
             p_sum += p_nmut[i];
         }
+        //the probabilities for n > n_max are added to n_max
         p_nmut[maxMut] = 1-p_sum;
         return(p_nmut);
     };
 
     Constants &Constants::get_instance() {
-        constexpr unsigned int L_mock = 0;
-        Constants& c = create_instance(L_mock, 0, 0, 0, 0, 0, std::filesystem::path());
-        if(L_mock != c.L)
+        if(inited) {
+            // Guaranteed to be destroyed.
+            // Instantiated on first use.
+            //mock call of constructor
+            static Constants& c = create_instance(0, 0, 0, 0, 0, 0, std::filesystem::path());
             return c;
-        else
-            throw("Singleton not correctly instantiated.");
+
+        }
+        //constexpr unsigned int L_mock = 0;
+        //Constants& c = create_instance(L_mock, 0, 0, 0, 0, 0, std::filesystem::path());
+        //if(L_mock != c.L)
+        //    return c;
+        else {
+            std::cerr << "Singleton not correctly instantiated." << std::endl;
+            //TODO anderen exception type
+            throw std::invalid_argument("Singleton not correctly instantiated.");
+        }
     }
 
     Constants & Constants::create_instance(const unsigned int length, const unsigned int q, const double p_mut,
@@ -77,6 +106,7 @@ namespace constants {
                                            const fs::path outputDir) {
         //static Constants instance(length);
         static Constants instance(length, q, p_mut, p_error, p_effect, p_epistasis, outputDir);
+        inited = true;
         return instance;
     }
 }

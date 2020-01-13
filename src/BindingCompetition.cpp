@@ -7,6 +7,7 @@
 #include <chrono>
 #include <random>
 
+//TODO weg
 std::valarray<kd_type> UnboundProtein::getSpeciesKds(const species::species_map& spec) {
     std::valarray<kd_type> kds(spec.size());
     unsigned i=0;
@@ -18,6 +19,7 @@ std::valarray<kd_type> UnboundProtein::getSpeciesKds(const species::species_map&
     return kds;
 }
 
+//TODO weg
 std::valarray<frequency_type> UnboundProtein::getSpeciesFrequencies(const species::species_map& spec){
     std::valarray<frequency_type> freq(spec.size());
     unsigned i=0;

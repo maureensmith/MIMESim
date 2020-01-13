@@ -17,18 +17,20 @@
 #include <chrono>
 #include <random>
 #include <set>
-#include <math.h>
+#include <cmath>
 
 namespace species
 {
     Species::Species(const unsigned int id): specId(id), numMut(getNumberOfMutationsById()), mutatedPositions(specIdxToMutPos()), read(createRead()),
-                                             count(0), mutCountBound(0), mutCountUnbound(0), errorCountBound(0.0), errorCountUnbound(0.0){};
+                                             count(0), mutCountBound(0), mutCountUnbound(0), errorCountBound(0.0), errorCountUnbound(0.0)
+                                             {
+                                             }
 
     unsigned int Species::getNumberOfMutationsById() {
         return species::getNumberOfMutationsById(this->specId);
     }
 
-    posVector Species::specIdxToMutPos() {
+    mutVector Species::specIdxToMutPos() {
             return species::specIdxToMutPos(this->specId);
     }
 
@@ -38,17 +40,18 @@ namespace species
         read.reserve(constants.L);
         for(unsigned i=1; i <= constants.L; ++i) {
             //TODO Workaround to set wildtype to A and mutations to C
-            read.add({i, nucleotid::nucleobase{'A'}});
+            read.add({i, nucleotid::nucleobase{1}});
         }
 
-        for(auto mutPos:mutatedPositions) {
-            auto pos = std::find_if(read.begin(), read.end(), [mutPos](const auto& val)
+        for(auto& mutPos:mutatedPositions) {
+            auto pos = std::find_if(read.begin(), read.end(), [&mutPos](const auto& val)
             {
-                return val.first == mutPos;
+                return val.first == mutPos.getPosition();
             });
             if(pos != read.end())
                 read.remove(pos);
-            read.add({mutPos, nucleotid::nucleobase{'C'}});
+            //TODO workaround: add the mutation as nucleobase, here simply  + 1 (->wt=A=1), create a wt to mut interpretation, or make it more general also for AA
+            read.add({mutPos.getPosition(), nucleotid::nucleobase{int(mutPos.getSymbol()+1)}});
         }
         return read;
     }
@@ -65,7 +68,7 @@ namespace species
         return numMut;
     }
 
-    const posVector &Species::getMutatedPositions() const {
+    const mutVector &Species::getMutatedPositions() const {
         return mutatedPositions;
     }
 
@@ -107,12 +110,12 @@ namespace species
         return errorCountBound;
     }
 
-    void Species::setErrorCountBound(int errorCuntBound) {
-        Species::errorCountBound = errorCuntBound;
+    void Species::setErrorCountBound(int errorCountBound) {
+        Species::errorCountBound = errorCountBound;
     }
 
-    void Species::addErrorCountBound(int errorCuntBound) {
-        Species::errorCountBound += errorCuntBound;
+    void Species::addErrorCountBound(int errorCountBound) {
+        Species::errorCountBound += errorCountBound;
     }
 
     int Species::getErrorCountUnbound() const {
@@ -151,6 +154,7 @@ namespace species
         constants::Constants& c = constants::Constants::get_instance();
         Species::kd = 1.0;
         //TODO nachfragen: wie setzt sich der Gesamteffekt zusammen? prod(Kd_i)*prod(e_ij) ?  oder prod(e_ij^2)?
+        //additive effect of epistasis (since we have the exponential of the epistasis here, it is multiplicative
         for(auto mutPos1_it = begin(Species::mutatedPositions); mutPos1_it != end(Species::mutatedPositions) ; ++mutPos1_it) {
             Species::kd *= effects.getKd(*mutPos1_it);
             //std::cout << "mut pos1 " << *mutPos1_it << std::endl;
@@ -190,17 +194,14 @@ namespace species
             int id = 1;
             if(numMut > 0) {
                 id = unif[numMut-1](generator);
+                //std::cout << "id " << id << std::endl;
             }
             ++m[id];
-
-            //compute id with sequening errors:
-//            auto newId = drawError(id, numMut);
-//            --m[id][1];
-//            ++m[newId][1];
         }
         return m;
     }
 
+    //TODO löschen
 //    idCountMap drawWildtypeErrors() {
 //        auto& constants = constants::Constants::get_instance();
 //        const int id = 1;
@@ -218,12 +219,17 @@ namespace species
 //    }
 
     //TODO schneller machen in dem nicht immer neuer generator und verteilung erstellt wird?
+    //TODO testen für q>2
     unsigned drawError(const unsigned id, const unsigned numMut) {
         auto& constants = constants::Constants::get_instance();
         const auto seed = static_cast<unsigned int>(std::chrono::system_clock::now().time_since_epoch().count());
         std::default_random_engine generator (seed);
         std::binomial_distribution<int> bino(constants.L,constants.P_ERR);
+        //random generator for the position with an error
         std::uniform_int_distribution<> unif_err(1,constants.L);
+        //random generator for the mutated symbol (if sequence symbol is wt, the errror is one of the mutations;
+        // if the sequence symbol is mutated, the according symbol is the wild type or one of the other mutations
+        std::uniform_int_distribution<> unif_sym(1,constants.Q-1);
 
         // if no errors: id stays the same
         unsigned newId = id;
@@ -233,23 +239,36 @@ namespace species
         numErrors = std::min<int>(numErrors, constants.MAX_MUT*2 - numMut);
 
         if(numErrors > 0) {
-            posVector mutations = species::specIdxToMutPos(id);
-            std::set<int> uniquePositions;
+            mutVector mutations = species::specIdxToMutPos(id);
+            //containing numErrors positions with error
+            //std::set<int> uniquePositions;
+            //containing numErrors Mutations with unique position
+            std::set<Mutation> uniquePositions;
+            //TODO für q>2 anpasseninsert
             while(uniquePositions.size() < numErrors) {
                 //draw position with error
-                unsigned position = unif_err(generator);
+                auto position = unif_err(generator);
+                //...and the symbol
+                auto symbol = unif_sym(generator);
                 //first time we sample this position
-                uniquePositions.insert(position);
+                uniquePositions.emplace(position, symbol);
             }
-            //if a real mutation has error, delete it (it turned into wild type), if not add it to the position list (to have it sorted)
-            for(auto& pos : mutations) {
-                auto it=uniquePositions.find(pos);
-                if(it != uniquePositions.end())
-                    uniquePositions.erase(it);
+
+            //if a real mutation has error, the according symbol need to be updated. In case it turns into wild type delete it
+            for(auto& mut : mutations) {
+                auto it=uniquePositions.find(mut);
+                if(it != uniquePositions.end()) {
+                    //TODO QUESTION teuer, aber selten.... machen?
+                    //in case the real mutations symbol is drawn, read it as wild type and delete from list
+                    if(it->getSymbol() == mut.getSymbol())
+                        uniquePositions.erase(it);
+                }
                 else
-                    uniquePositions.insert(pos);
+                    uniquePositions.insert(mut);
             }
-            posVector newMutations(uniquePositions.begin(), uniquePositions.end());
+
+            //create a new species which includes both real and error mutations
+            mutVector newMutations(uniquePositions.begin(), uniquePositions.end());
 //            if(newMutations.size() > constants.MAX_MUT)
 //                std::cout << "ACHTUNG: MEHR " << newMutations.size() << std::endl;
 
@@ -259,48 +278,104 @@ namespace species
         return newId;
     }
 
-    posVector specIdxToMutPos(const unsigned specId) {
+    //TODO: rekursiver Aufruf? Aber dafür müsste jedesmal für irgendein L' (Restlänger nach aktueller Position) die ID ranges berechnet werden, oder mache ich das eh?
+    mutVector specIdxToMutPos(const unsigned specId) {
         constants::Constants& constants = constants::Constants::get_instance();
         auto numMut = getNumberOfMutationsById(specId);
-        posVector mutPos(numMut);
+        //collect the mutated position with the respective mutation symbol
+        mutVector mutPos;
+        mutPos.reserve(numMut);
+
+        //TODO mit q anpassen
+        //TODO weg: save the "symbol" of the mutation for each position
+        //mutVector mutSymbol(numMut);
         // check if Id is valid
         if(specId<=constants.NMUT_RANGE.back() && numMut > 0) {
             unsigned int Lact = constants.L;
             unsigned int numMutAct = numMut;
+            auto mSymbols = constants.Q-1;
 
-            //#get the id within the range of number of mutations (substract the ids for the sequences with less mutations)
+            //TODO weg
+//            if(specId ==22)
+//                std::cout << "Blub";
+            //get the id within the range of number of mutations (substract the ids for the sequences with less mutations)
             unsigned int idAct = specId - constants.NMUT_RANGE[numMut-1];
+
+
             // determine each mutations position seen from the mutations position before...
             for(unsigned int m=0; m<numMut; ++m){
                 // for each possible positions within the length the actual mutation covers a range of ids depending on the residual mutations to follow
-                std::vector<unsigned int> cumSumRange(Lact-(numMutAct-1));
-                bool indexFound = false;
-                for(unsigned int i = 0; i<Lact-(numMutAct-1) && !indexFound; ++i) {
-                    cumSumRange[i] = utils::nChoosek(Lact-i-1, numMutAct-1);
+                std::vector<unsigned long> cumSumRange(Lact-(numMutAct-1));
+                //bool indexFound = false;
+                unsigned int i = 0;
+                //initialise first value of the vector for cummulative sum (do it so complicated to not compute the whole range if not necessary)
+                cumSumRange[0] = utils::nChoosek(Lact-1, numMutAct-1) * std::pow(mSymbols, numMut);
+                // find the id within the ranges and get the index (=position)
+                while(idAct > cumSumRange[i] && i<Lact-(numMutAct-1)) {
+                    ++i;
+                //for(; i<Lact-(numMutAct-1) && !indexFound; ++i) {
+                    //TODO test
+                    cumSumRange[i] = utils::nChoosek(Lact-i-1, numMutAct-1) * std::pow(mSymbols, numMut);
                     if(i>0) {
                         cumSumRange[i] += cumSumRange[i-1];
                     }
-                    // find the id within the ranges and get the index (=position)
-                    if(idAct <= cumSumRange[i]) {
-                        mutPos[m] = i+1;
-                        indexFound = true;
-                    }
                 }
+
+                //TODO weg
+                //mutPos[m] = i + 1;
+                // the symbol of a posisition  is given for (q-1) ^ numMut-1 times (e.g. with three mutations and 2 symbols 2 ^2 times) : AAA, AAB, ABA, ABB
+                int symbolCombiPerPos = std::pow(mSymbols, numMutAct-1);
+                //TODO getestet? wenn ja, comments weg
+                //find symbol
+                unsigned mut = (int)std::floor((idAct-1) / symbolCombiPerPos) % mSymbols;
+
+                unsigned int pos = i + 1; //TODO Utils hat noch das- *cumSumRange.begin()
+                unsigned int prePos = mutPos.begin() == mutPos.end() ? 0 : mutPos.rbegin()->getPosition();
+
+                //arguments: the two pair_constructor parameter pos and mut, adding the last cummulative position
+                // (= position seend frim the beginning of the sequence)
+                mutPos.emplace_back(pos + prePos, mut);
+
+                       // indexFound = true;
+
                 //the residual length after the actual mutation
-                Lact = Lact - mutPos[m];
+                Lact = Lact - pos;
                 // the redsiudal number of mutations after the actual mutation
                 --numMutAct;
-                // the id within the residual length
-                idAct =  idAct - (mutPos[m]==1 ? 0 : cumSumRange[mutPos[m]-1-1]);
+                // the id within the residual length (-1 because the indices start at 0 and another -1 because we
+                // substract the ids of the preceeding mutations range
+                idAct =  idAct - (pos==1 ? 0 : cumSumRange[i-1]);// hier stimmt was nicht
 
             }
         }
         //.... and get the correct positions within the sequence with cumsum
-        std::partial_sum(mutPos.begin(), mutPos.end(), mutPos.begin());
+        //TODO in die schleife rein, wie in Utils..
+        //std::partial_sum(mutPos.begin(), mutPos.end(), mutPos.begin());
+
+        //TODO weg wenn alles getestet
+        //if(numMut==5) {
+         //   std::cout << "id: " << specId << std::endl;
+//            for (auto blub : mutPos) {
+//                std::cout << "pos " << blub.getPosition() << " mut " << blub.getSymbol() << std::endl;
+//            }
+    //    }
+            //TODO weg, hab ich ja shcon oben gelöst
+//            std::partial_sum(mutPos.begin(), mutPos.end(), mutPos.begin(),
+//                             [](const Mutation &x, const Mutation &y) {
+//                                 return Mutation(x.getPosition() + y.getPosition(), y.getSymbol());
+//                             }
+//            );
+//            std::cout << "nachher: " << std::endl;
+//            for (auto blub : mutPos) {
+//                std::cout << "pos " << blub.getPosition() << " mut " << blub.getSymbol() << std::endl;
+//            }
+//        }
+
         return(mutPos);
     }
 
-    unsigned mutPosToSpecIdx(const posVector mutPos) {
+    //TODO testen! (vorallem das mit partial sum)
+    unsigned mutPosToSpecIdx(const mutVector& mutPos) {
         constants::Constants& constants = constants::Constants::get_instance();
         unsigned numMut = mutPos.size();
         //id for 0 mutations is 1
@@ -308,24 +383,31 @@ namespace species
         if(numMut > 0) {
             // add the ids for the sequences with less mutations
             specId = constants.NMUT_RANGE[numMut-1];
-            posVector mutPos_new = mutPos;
+            mutVector mutPos_new = mutPos;
             // get the indices for the individual length segments for each position
-             for(unsigned i = 1; i<mutPos_new.size(); ++i) {
-                 mutPos_new[i] -= mutPos[i-1];
-             }
+            std::partial_sum(mutPos.begin(), mutPos.end(), mutPos_new.begin(),
+                    [](const Mutation & x, const Mutation& y){return Mutation(y.getPosition() - x.getPosition(), y.getSymbol());});
+            //TODO weg get the indices for the individual length segments for each position
+//             for(unsigned i = 1; i<mutPos_new.size(); ++i) {
+//                 mutPos_new[i].getPosition() -= mutPos[i-1].getPosition();
+//             }
             unsigned Lact = constants.L;
             unsigned numMutAct = numMut;
-            for(unsigned int m=0; m<numMut; ++m) {
+
+            //Notiz an mich selbst: enforcing const elements in range iteration (C++17)
+            for(auto const& mutation : std::as_const(mutPos_new)) {
                 if(numMutAct == 1) {
-                    specId += mutPos_new[m];
+                    //TODO überall checken: the possible mutations are represented from 0 upwards
+                    specId += mutation.getPosition()+mutation.getSymbol();
                 } else {
-                    // if the position of the actual mutations is 1, the id is depending on the next position
-                    if(mutPos_new[m]!=1) {
-                        for(int i = 1; i<mutPos_new[m]; ++i) {
-                            specId += utils::nChoosek(Lact-i, numMutAct-1);
+                    // if the position of the actual mutations is != 1, the id is depending on the next position
+                    if( mutation.getPosition()!=1) {
+                        for(int i = 1; i<mutation.getPosition(); ++i) {
+                            // specId += utils::nChoosek(Lact-i, numMutAct-1);
+                            specId += utils::nChoosek(Lact-i, numMutAct-1) * pow(constants.Q-1, numMutAct);
                         }
                     }
-                    Lact -= mutPos_new[m];
+                    Lact -= mutation.getPosition();
                     --numMutAct;
                 }
             }

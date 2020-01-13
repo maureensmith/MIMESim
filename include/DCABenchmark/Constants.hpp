@@ -50,8 +50,10 @@ namespace constants {
         static constexpr unsigned int M = 12*pow(10,6);
         //sequence length
         const unsigned int L;
-        //number of pairwise values
-        const unsigned int PW;
+        //number of single values with al symbols
+        const unsigned int SVal;
+        //number of pairwise values with all combinations of symbols
+        const unsigned int PWVal;
         // symbols per position
         const unsigned int Q;
         // probability for a mutation
@@ -67,6 +69,8 @@ namespace constants {
         //std::array<unsigned int, MAX_MUT+1> setNMutRange();
         //std::array<double, MAX_MUT+1> setP_NMut();
         std::vector<unsigned int> setNMutRange(const unsigned int maxMut, const unsigned L );
+        //TODO: austauschen
+        std::vector<unsigned int> setNMutRange(const unsigned int maxMut, const unsigned int L, const unsigned int q);
         std::vector<double> setP_NMut(const unsigned int MaxMut, const unsigned L, const double pMut);
         unsigned int computeMaxMut(const unsigned int L, const double pMut);
 
@@ -87,14 +91,18 @@ namespace constants {
         Constants(Constants&&) = delete;
 
     private:
+        //a flag for showing if the singleton has already been initiated
+        static bool inited;
+        static Constants& instance;
+
         // Default-constructor is private, to prevent client code from creating new
         // instances of this class. The only instance shall be retrieved through the
         // create_instance() function.
         //TODO: workaround, 3 mal die gleiche routine (computeMaxMut) aufrufen, weil es erst am  ende alles gespeichert wird, anders lösen?
         Constants(unsigned int length, unsigned int q, double p_mut, double p_error, double p_effect, double p_epistasis, fs::path outputDir) :
-                L(length),PW(length*(length-1)/2), Q(q), P_MUT(p_mut), P_ERR(p_error), P_EFFECT(p_effect), P_EPISTASIS(p_epistasis),
-                MAX_MUT(computeMaxMut(length,p_mut)), NMUT_RANGE(setNMutRange(computeMaxMut(length,p_mut),L)), P_NMUT(setP_NMut(computeMaxMut(length,p_mut),length,p_mut)), OUTPUT_DIR(outputDir) {};
-        //Constants(unsigned int length, unsigned int q, double p_mut) : L(length),PW(L*(L-1)/2), Q(q), P_MUT(p_mut), NMUT_RANGE(setNMutRange()), P_NMUT(setP_NMut()) {};
+                L(length), SVal(length * (q-1)), PWVal((length * (length - 1) / 2)*std::pow(q-1,2)), Q(q), P_MUT(p_mut), P_ERR(p_error), P_EFFECT(p_effect), P_EPISTASIS(p_epistasis),
+                MAX_MUT(computeMaxMut(length,p_mut)), NMUT_RANGE(setNMutRange(computeMaxMut(length,p_mut),L, q)), P_NMUT(setP_NMut(computeMaxMut(length,p_mut),length,p_mut)), OUTPUT_DIR(outputDir) {};
+        //Constants(unsigned int length, unsigned int q, double p_mut) : L(length),PWVal(L*(L-1)/2), Q(q), P_MUT(p_mut), NMUT_RANGE(setNMutRange()), P_NMUT(setP_NMut()) {};
     };
 }
 #endif /* Constants_hpp */
