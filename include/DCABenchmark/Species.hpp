@@ -13,6 +13,7 @@
 #include <array>
 #include <vector>
 #include <map>
+#include <unordered_map>
 #include "Mutation.hpp"
 
 #include "sam2counts/ref_map.hpp"
@@ -25,13 +26,13 @@ namespace species {
     //TODO stattdessen einfach Mutation?
    // typedef std::pair<unsigned, unsigned> posMutPair;
     //contain each mutated position with the respective mutation
-    //TODO weg? typedef std::vector<posMutPair> mutVector;
     typedef std::vector<Mutation> mutVector;
     //typedef std::map<int, std::array<int, 2>> idCountMap;
     //TODO umändern in unordered_map und vergleichen
-    typedef std::map<int, int> idCountMap;
+    typedef std::unordered_map<int, int> idCountMap;
 
-    idCountMap drawSpeciesIds();
+    //TODO weg?
+    //idCountMap drawSpeciesIds();
 
     unsigned drawError(const unsigned id, const unsigned numMut);
 
@@ -55,8 +56,8 @@ namespace species {
         //double freq;
         //KD of the the given sequence, adding all single Kds of the mutations and the epistatic effects for pairs
         double kd = 1.0;
-        //for later count purposes directly create a read
-        const ref::ref_map read;
+        //TODO for later count purposes directly create a read. nee weg damit, nimmt zu viel platz ein
+       // const ref::ref_map read;
 
         /**** after ODE: save bound and unbound fraction information ****/
 
@@ -71,7 +72,6 @@ namespace species {
 
         mutVector specIdxToMutPos();
 
-        ref::ref_map createRead();
     public:
         Species(const unsigned int id);
 
@@ -89,9 +89,13 @@ namespace species {
 
         void setCount(unsigned int count);
 
+        void incrementCount();
+
         void computeSpeciesKd();
 
-        const ref::ref_map &getRead() const;
+        //const ref::ref_map &getRead() const;
+
+        ref::ref_map createRead();
 
         unsigned int getMutCountBound() const;
 
@@ -125,7 +129,9 @@ namespace species {
 
     };
 
-    using species_map = std::map<int, Species>;
+    using species_map = std::unordered_map<int, Species>;
+
+    species_map drawSpeciesIds();
 
     //TODO: Umbau nach counts
     //void addCountsWithError(const std::valarray<double>& freqBound, const std::valarray<double>& freqUnbound,

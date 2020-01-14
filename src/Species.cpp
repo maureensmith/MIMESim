@@ -21,7 +21,7 @@
 
 namespace species
 {
-    Species::Species(const unsigned int id): specId(id), numMut(getNumberOfMutationsById()), mutatedPositions(specIdxToMutPos()), read(createRead()),
+    Species::Species(const unsigned int id): specId(id), numMut(getNumberOfMutationsById()), mutatedPositions(specIdxToMutPos()),
                                              count(0), mutCountBound(0), mutCountUnbound(0), errorCountBound(0.0), errorCountUnbound(0.0)
                                              {
                                              }
@@ -85,9 +85,13 @@ namespace species
         Species::count = count;
     }
 
-    const ref::ref_map &Species::getRead() const {
-        return read;
+    void Species::incrementCount() {
+        ++this->count;
     }
+
+//    const ref::ref_map &Species::getRead() const {
+//        return read;
+//    }
 
 
     unsigned int Species::getMutCountBound() const {
@@ -169,10 +173,13 @@ namespace species
         }
     }
 
-    idCountMap drawSpeciesIds() {
+    species::species_map drawSpeciesIds() {
         auto& constants = constants::Constants::get_instance();
         const auto seed = static_cast<unsigned int>(std::chrono::system_clock::now().time_since_epoch().count());
         std::default_random_engine generator (seed);
+
+        //contains the map with all sequence species
+        species::species_map species_map;
 
         // Break down the drawing of all possible (allowed) species ids into 2 smaller ones:
         //first draw a the number of mutations from 0 to MAX_MUT, with the given probabilities...
@@ -186,37 +193,25 @@ namespace species
                                                              constants.NMUT_RANGE[numMut]);
         }
         // count the given species
-        idCountMap m;
         for(int n=0; n<constants.M; ++n) {
             //draw number of mutations
             const int numMut = d(generator);
             //if no mutations, the id is always 1
             int id = 1;
             if(numMut > 0) {
-                id = unif[numMut-1](generator);
-                //std::cout << "id " << id << std::endl;
+                id = unif[numMut - 1](generator);
             }
-            ++m[id];
-        }
-        return m;
-    }
+            //create new object if not yet present
+            if(species_map.find(id) == species_map.end()) {
+                //the id is the key for the map, and also the parameter for the constructor for the species class
+                species_map.emplace(id, id);
+                species_map.at(id).computeSpeciesKd();
 
-    //TODO löschen
-//    idCountMap drawWildtypeErrors() {
-//        auto& constants = constants::Constants::get_instance();
-//        const int id = 1;
-//        const int numMut = 0;
-//        // count the given species
-//        idCountMap m;
-//        for(int n=0; n<constants.M; ++n) {
-//            ++m[id][0];
-//            //compute id with sequening errors:
-//            auto newId = drawError(id, numMut);
-//            --m[id][1];
-//            ++m[newId][1];
-//        }
-//        return m;
-//    }
+            }
+            species_map.at(id).incrementCount();
+        }
+        return species_map;
+    }
 
     //TODO schneller machen in dem nicht immer neuer generator und verteilung erstellt wird?
     //TODO testen für q>2

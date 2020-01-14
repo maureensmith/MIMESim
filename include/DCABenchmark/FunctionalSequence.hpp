@@ -42,6 +42,13 @@ private:
      */
     unsigned int getMatrixVectorIndex(const Mutation& a, const Mutation& b);
 
+    /**
+     * computes index within vector of position and symbol
+     * @param m Mutation = pair of position and symbol
+     * @return the index within the vector
+     */
+    unsigned int getVectorIndex(const Mutation& m);
+
 public:
 
     /**

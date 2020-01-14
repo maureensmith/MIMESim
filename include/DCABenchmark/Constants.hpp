@@ -99,6 +99,7 @@ namespace constants {
         // instances of this class. The only instance shall be retrieved through the
         // create_instance() function.
         //TODO: workaround, 3 mal die gleiche routine (computeMaxMut) aufrufen, weil es erst am  ende alles gespeichert wird, anders lösen?
+        // Lösung siehe Species: indexToMutPos, erst aufruf ohne parameter um dann den member parameter mitugeben.
         Constants(unsigned int length, unsigned int q, double p_mut, double p_error, double p_effect, double p_epistasis, fs::path outputDir) :
                 L(length), SVal(length * (q-1)), PWVal((length * (length - 1) / 2)*std::pow(q-1,2)), Q(q), P_MUT(p_mut), P_ERR(p_error), P_EFFECT(p_effect), P_EPISTASIS(p_epistasis),
                 MAX_MUT(computeMaxMut(length,p_mut)), NMUT_RANGE(setNMutRange(computeMaxMut(length,p_mut),L, q)), P_NMUT(setP_NMut(computeMaxMut(length,p_mut),length,p_mut)), OUTPUT_DIR(outputDir) {};

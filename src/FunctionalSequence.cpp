@@ -46,7 +46,14 @@ FunctionalSequence& FunctionalSequence::get_instance(){
 }
 
 const double FunctionalSequence::getKd(const Mutation& p) {
-    return kds.at(p.getPosition()+p.getSymbol()-1);
+    return kds.at(getVectorIndex(p));
+}
+
+//TODO test
+unsigned int FunctionalSequence::getVectorIndex(const Mutation& m) {
+    auto& c =  constants::Constants::get_instance();
+    //all positions x symbols before (+ 1 for actual position -1 as index starts at 0) + the symbol of the actual position
+    return ((m.getPosition()-1)*(c.Q-1));
 }
 
 //TODO test
