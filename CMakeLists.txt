@@ -1,15 +1,15 @@
 cmake_minimum_required(VERSION 3.10)
-project(DCABenchmark)
+project(MIMESim)
 #Option to run Unit Tests
-option(DCABenchmarkTest_WITH_COV "Enable profiling and coverage report analysis" OFF)
+option(MIMESimTest_WITH_COV "Enable profiling and coverage report analysis" OFF)
 option(UNIT_TESTING "Enable Unit Testing" ON)
 SET(CMAKE_CODEBLOCKS_EXCLUDE_EXTERNAL_FILES OFF)
 
 #TODO Projekt umbeennnen: Ist ja erstmal nur Datenerzeugen, bzw Sequenz Evolution für gewisse Funktion/Evolutionary constraints simulieren:
-set(DCABenchmark_VERSION_MAJOR 0)
-set(DCABenchmark_VERSION_MINOR 1)
-set(DCABenchmark_VERSION_PATCH 0)
-set(DCABenchmark_VERSION "${DCABenchmark_VERSION_MAJOR}.${DCABenchmark_VERSION_MINOR}.${DCABenchmark_VERSION_PATCH}")
+set(MIMESim_VERSION_MAJOR 0)
+set(MIMESim_VERSION_MINOR 1)
+set(MIMESim_VERSION_PATCH 0)
+set(MIMESim_VERSION "${MIMESim_VERSION_MAJOR}.${MIMESim_VERSION_MINOR}.${MIMESim_VERSION_PATCH}")
 
 set(CMAKE_CXX_STANDARD 20)
 #set(CMAKE_CXX_FLAGS_RELEASE "${MAKE_CXX_FLAGS_RELEASE} -O3 -DNDEBUG")
@@ -17,7 +17,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 
-#include_directories(extern DCABenchmark TestDCABenchmark)
+#include_directories(extern MIMESim TestMIMESim)
 #TODO ggf checken ob beim MIME + DCA überhaupt benötigt wird, dann hier rein schieben
 include_directories(../extern)
 #including static library for sam2counts
@@ -26,7 +26,7 @@ link_directories(../libs)
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
 #TODO nötig? Oder setzte ich das am Anfang im Projekt?
-#set_property(TARGET DCABenchmark PROPERTY VERSION ${DCABenchmark_VERSION})
+#set_property(TARGET MIMESim PROPERTY VERSION ${MIMESimVERSION})
 
 # Some other library that we import that was also built using CMake
 # and has an exported target.
@@ -44,7 +44,7 @@ add_subdirectory(src)
 if(UNIT_TESTING)
     MESSAGE(${CMAKE_CXX_COMPILER_ID})
     #gcov is only available with gcc
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND DCABenchmarkTest_WITH_COV)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND MIMESimTest_WITH_COV)
         #Flags to analyse the code coverage of the unit tests
         # --coverage =  generate additional info for gcov, is a synonym for -ftest-coverage, -fprofile-arcs and -lgcov
         #-g = debugging info, -p = collect profiling stats during runtime for code coverage analysis
