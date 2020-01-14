@@ -9,14 +9,7 @@
 #include "Constants.hpp"
 
 TEST_CASE("Testing FunctionalSequence Class") {
-    //TODO: wie kann ich für verschiedene Test cases verschieden set ups erstellen so dass sie innerhalb des cases für alle sections gilt, aber nicht für alle cases?
-    const unsigned int length = 10;
-    const unsigned int q = 2;
-    const double p_mut = 0.1;
-    const double p_error = p_mut/10;
-    const double p_effect = 0.5;
-    const double p_epistasis = 0.3;
-    constants::Constants &cons = constants::Constants::create_instance(length, q, p_mut, p_error, p_effect,  p_epistasis);
+    constants::Constants &cons = constants::Constants::get_instance();
 
     SECTION("test function getMatrixIndex which converts 2 indicices into the corresponding index  of a vectoral symmetric matrix") {
 

@@ -10,14 +10,15 @@
 #include "Constants.hpp"
 
 TEST_CASE("Testing Binding Competition") {
-    //TODO: wie kann ich für verschiedene Test cases verschieden set ups erstellen so dass sie innerhalb des cases für alle sections gilt, aber nicht für alle cases?
-    const unsigned int length = 10;
-    const unsigned int q = 2;
-    const double p_mut = 0.1;
-    const double p_error = p_mut/10;
-    const double p_effect = 0.5;
-    const double p_epistasis = 0.3;
-    constants::Constants &cons = constants::Constants::create_instance(length, q, p_mut, p_error, p_effect,  p_epistasis);
+    //TODO: WEG DAMIT wie kann ich für verschiedene Test cases verschieden set ups erstellen so dass sie innerhalb des cases für alle sections gilt, aber nicht für alle cases?
+//    const unsigned int length = 10;
+//    const unsigned int q = 2;
+//    const double p_mut = 0.1;
+//    const double p_error = p_mut/10;
+//    const double p_effect = 0.5;
+//    const double p_epistasis = 0.3;
+
+    constants::Constants &cons = constants::Constants::get_instance();
 
     std::cout << "****** Sample mutational effects *******" << std::endl;
     // Create Ground Truth: Effects of each mutated position and epistatic effects and sequencing noise
@@ -25,8 +26,10 @@ TEST_CASE("Testing Binding Competition") {
     std::vector<Mutation> mutationsPerPos_vec;
     mutationsPerPos_vec.reserve(cons.L);
     for (int i = 1; i <= cons.L; ++i) {
-        //create instance for each
-        mutationsPerPos_vec.emplace_back(i, effects.getKd(i));
+        for(int j = 1; j < cons.Q; ++j) {
+            //create instance for each
+            mutationsPerPos_vec.emplace_back(i, j, effects.getKd(i));
+        }
     }
 
     std::cout << "****** Create species *******" << std::endl;
@@ -62,7 +65,7 @@ TEST_CASE("Testing Binding Competition") {
 
             ++i;
         }
-        REQUIRE(Approx(S_bound_tot.sum()/(double)cons.M + B).epsilon(0.0001) == f.getB_tot());
+        REQUIRE(Approx(S_bound_tot.sum()/(double)cons.M + B).epsilon(0.001) == f.getB_tot());
     }
 
 }
