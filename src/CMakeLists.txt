@@ -8,7 +8,7 @@ set(MIMESIM_HEADER_LIST
         ../include/MIMESim/Utils.hpp
         ../include/MIMESim/FunctionalSequence.hpp
         ../include/MIMESim/BindingCompetition.hpp
-        )
+        ../include/MIMESim/Count.hpp)
 
 set(MIMESIM_SOURCE_LIST
         Constants.cpp
@@ -17,7 +17,7 @@ set(MIMESIM_SOURCE_LIST
         Utils.cpp
         FunctionalSequence.cpp
         BindingCompetition.cpp
-        )
+        Count.cpp)
 
 #Set(BUILD_SHARED_LIBS ON)
 #MESSAGE(HALLOOO ${BUILD_SHARED_LIBS})

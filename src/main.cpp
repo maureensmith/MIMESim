@@ -19,9 +19,10 @@
 #include "FunctionalSequence.hpp"
 #include "BindingCompetition.hpp"
 
-#include "sam2counts/reference.hpp"
-#include "sam2counts/nucleobase.hpp"
-#include "sam2counts/count.hpp"
+//#include "sam2counts/reference.hpp"
+//#include "sam2counts/nucleobase.hpp"
+//#include "sam2counts/count.hpp"
+#include "Count.hpp"
 
 namespace fs = std::filesystem;
 
@@ -83,7 +84,6 @@ int main(int argc, const char * argv[]) {
     diff = end-start;
     std::cout << "Duration: " << diff.count() << " s\n";
 
-
 //TODO: diese Art der Abfrage in die Tests packen
 //    std::cout << "wt species count + freq. " << species_vec.at(1).getCount() << " " << species_vec.at(1).getFreq() << std::endl;
 //    std::cout << "mut species count + freq. " << species_vec.at(2).getCount() << " " << species_vec.at(2).getFreq() << std::endl;
@@ -119,10 +119,10 @@ int main(int argc, const char * argv[]) {
     UnboundProtein f(species_vec);
     f.solve(S_bound, S_unbound);
 
-    //std::cout << "wt bound unbound freq. " << f_bound_tot[0] << " " << f_unbound_tot[0] << std::endl;
-    //std::cout << "mut bound unbound freq. " << f_bound_tot[1] << " " << f_unbound_tot[1] << std::endl;
-    //std::cout << "mut bound unbound freq. " << f_bound_tot[2] << " " << f_unbound_tot[2] << std::endl;
-
+    //stimmt ja so nicht mehr, da unrdered map
+//    std::cout << "wt bound unbound freq. " << S_bound[0] << " " << S_unbound[0] << std::endl;
+//    std::cout << "mut bound unbound freq. " << S_bound[1] << " " << S_unbound[1] << std::endl;
+//    std::cout << "mut bound unbound freq. " << S_bound[2] << " " << S_unbound[2] << std::endl;
 
     //*************solve for wt
     //TODO: Umbau nach counts
@@ -143,13 +143,19 @@ int main(int argc, const char * argv[]) {
     //Carefull: The map is extended by species that occur only because of sequencing error, hence the length of S_bound and
     //S_unbound dont fit any more with the length of the map
     //TODO: Umbau nach counts
-    species::addCountsWithError(S_bound, S_unbound, species_vec);
+    //species::addCountsWithError(S_bound, S_unbound, species_vec);
 
-    species::addCountsWithError(S_bound_wt, S_unbound_wt, wtSpecies_vec);
+    //species::addCountsWithError(S_bound_wt, S_unbound_wt, wtSpecies_vec);
+
+    auto counters = species::countMutationsWithErrors(S_bound, S_unbound, species_vec);
 
     end = std::chrono::high_resolution_clock::now();
     diff = end-start;
     std::cout << "Duration: " << diff.count() << " s\n";
+
+
+    exit(0);
+/*
 
     std::cout << "****** Count Mut Library *******" << std::endl;
     start = std::chrono::high_resolution_clock::now();
@@ -402,7 +408,7 @@ int main(int argc, const char * argv[]) {
     std::cout << "Duration: " << diff.count() << " s\n";
 
     std::cout << "****** Done *******" << std::endl;
-
+*/
 
     return 0;
 }

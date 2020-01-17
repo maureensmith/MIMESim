@@ -13,8 +13,10 @@
 #include <array>
 #include <vector>
 #include <map>
+#include <set>
 #include <unordered_map>
 #include "Mutation.hpp"
+#include "Count.hpp"
 
 #include "sam2counts/ref_map.hpp"
 
@@ -35,6 +37,8 @@ namespace species {
     //idCountMap drawSpeciesIds();
 
     unsigned drawError(const unsigned id, const unsigned numMut);
+
+    std::set<Mutation> drawError_2(mutVector& mutations);
 
     mutVector specIdxToMutPos(const unsigned specId);
 
@@ -138,6 +142,9 @@ namespace species {
      //                       species_map& spec_map);
     void addCountsWithError(const std::valarray<unsigned int>& SBound, const std::valarray<unsigned int>& SUnbound,
                             species_map& spec_map);
+
+    count::counter_collection countMutationsWithErrors(const std::valarray<unsigned int>& SBound, const std::valarray<unsigned int>& SUnbound,
+                                  const species_map& spec_map);
 
 }
 #endif /* Species_hpp */

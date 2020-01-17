@@ -1,0 +1,74 @@
+* commit 3cbd62b6696a05504fe89fe262c170a59d141226
+| Author: Maureen Smith <maureen.smith@gmx.de>
+| Date:   Tue Sep 25 11:49:41 2018 +0200
+| 
+|     BUGFIX: The double mutants were counted twice -> only look at double mutants for this were pos1 < pos2. Also increased M (amount of viruses). Instead of 4 Million, now 12 Million, and a higher mutation rate: 0.003, instead of 0.001. Utils: the species to id routine is extended for q > 2. But should be refactored and put into the DCA folder
+| 
+* commit 3d3c7ab659a589cf1649fe053ec866619bb88f43
+| Author: Maureen Smith <maureen.smith@gmx.de>
+| Date:   Fri Aug 24 13:54:40 2018 +0200
+| 
+|     Deleted downloaded Eigen package, since it's installed in brew. Not using Eigen structures for the results, it's a pain in the ***, and also only a vector is necessary. Mean Field approximation, using a restricted computation of the probabilites from the PLM function (up to 3 mutations allowed) works. Next step: Using the MF computation and implement the classic MIME approach and write the results.
+| 
+* commit 067551105ef5b7ac4a2300923cb7cfafd850cf0a
+| Author: Maureen Smith <maureen.smith@gmx.de>
+| Date:   Fri Aug 17 11:41:01 2018 +0200
+| 
+|     computation of E and h for the direct couplings, so far using a vector of vector of valarrays, better refactoring into Matrix of Eigen since this is used anyway for the matrix inversion of the mean field approximation, one fix to make it fast (in case it happens again): creating the matrix with Eigen, better no auto but the actual strucure, otherwise this structure has to be build everytime it is used-> sloooow; creating testdata to compare with output of R program, so far it works, maybe there is an easier way to compute it instead of all the for loops (calculating h)
+| 
+* commit 54d5bb763dc8a1bb4bd15a397a8c52b200d5478a
+| Author: Maureen Smith <maureen.smith@gmx.de>
+| Date:   Fri Jun 22 12:18:19 2018 +0200
+| 
+|     creating files for mean field approsimation of the inverse potts model. not working yet
+| 
+* commit c76f7d1aa013761cc24ca1c8356f36a0a93ec9a7
+| Author: Maureen Smith <maureen.smith@gmx.de>
+| Date:   Fri Jun 22 12:16:03 2018 +0200
+| 
+|     Long time no commit... a lot of bug fixing.Creation of test data more or less finished. Problem were with very large species id in ints, so using long. if any troubles (because undefined behaveiour) look for that. Also running time was bad, now solved (optimised, could at some parts be even better). Test are working, but should be extended. Nevertheless created 100 test sets with L=400. Documented the test sampling in the thesis. But still some ToDos. filesystem is not working although g++8 and c++17. don't know why. instead create directories for output in bash script.
+| 
+* commit 05276357f147ef760db7ebc8095b1bfee38ba263
+| Author: Maureen Smith <maureen.smith@gmx.de>
+| Date:   Mon May 28 17:04:59 2018 +0200
+| 
+|     Unit Test for the function to comute the mutation sites with a species id, starting with generating species ids, but has to be speeded up
+| 
+* commit 2f64e40cca286e36549068d4a3de3aa8e13d93cb
+| Author: Maureen Smith <maureen.smith@gmx.de>
+| Date:   Wed May 23 17:57:11 2018 +0200
+| 
+|     Implementing the class for species with the function of converting a species id into the mutated sequences (TODO here: write test is the outcome is the same as in the R script)
+|     Implementing Utils: binomial coefficient (n choose k).
+|     Implementing a class for general constants: will be faster for Runtime, since some of the constants are the same for all drawn species.
+|     R scripts: nothing important, only deleting comments and check whats done where
+| 
+* commit 0160ca968d1da4f994917efc6235c9713e0b00fc
+| Author: Maureen Smith <maureen.smith@gmx.de>
+| Date:   Fri May 4 11:44:37 2018 +0200
+| 
+|     test data set up too slow in R with long sequences (100 or more), so trying to implement it in c++
+| 
+* commit 8f751f4d283bdd2d321e68c9bc3855a45ff20f0f
+| Author: Maureen Smith <maureen.smith@gmx.de>
+| Date:   Fri May 4 11:43:10 2018 +0200
+| 
+|     Initial Chapter DCA Benchmark, starting with the test data set up, copy of Notizen for Direct Epistasis
+| 
+* commit 9967385ff0e4dd84b6aed64e060627bd5d408619
+| Author: Maureen Smith <maureen.smith@gmx.de>
+| Date:   Wed May 2 14:44:44 2018 +0200
+| 
+|     added these modified files, no changes, just werent on the list
+| 
+* commit 8b09fb66f9c33b011231419d6cc09609433b3f78
+| Author: Maureen Smith <maureen.smith@gmx.de>
+| Date:   Wed May 2 14:42:49 2018 +0200
+| 
+|     copying the r files for evoultionary couplings in the last functioning status, inlcuding the mean field approach with bethe-peierls approximation
+| 
+* commit 5a176c46bc4c7330d8eef2f939b3cc954556d0eb
+  Author: Maureen Smith <maureen.smith@gmx.de>
+  Date:   Wed May 2 12:17:05 2018 +0200
+  
+      Initial thesis version: Fahrplan and Somehow structure of the thesis
