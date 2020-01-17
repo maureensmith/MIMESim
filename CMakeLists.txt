@@ -5,7 +5,6 @@ option(MIMESimTest_WITH_COV "Enable profiling and coverage report analysis" OFF)
 option(UNIT_TESTING "Enable Unit Testing" ON)
 SET(CMAKE_CODEBLOCKS_EXCLUDE_EXTERNAL_FILES OFF)
 
-#TODO Projekt umbeennnen: Ist ja erstmal nur Datenerzeugen, bzw Sequenz Evolution für gewisse Funktion/Evolutionary constraints simulieren:
 set(MIMESim_VERSION_MAJOR 0)
 set(MIMESim_VERSION_MINOR 1)
 set(MIMESim_VERSION_PATCH 0)
@@ -21,7 +20,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 #TODO ggf checken ob beim MIME + DCA überhaupt benötigt wird, dann hier rein schieben
 include_directories(extern)
 #including static library for sam2counts
-link_directories(libs)
+link_directories(../libs)
 
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
