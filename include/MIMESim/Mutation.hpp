@@ -21,8 +21,11 @@ private:
 public:
     Mutation(const unsigned int p, const unsigned int s);
 
+    //position from 1 .. L
     const unsigned int getPosition() const;
 
+    //mutation symbol from 0 .. Q-1 -1
+    //TODO ändern? von 1 .. Q-1?
     const unsigned int getSymbol() const;
 
     //TODO weg?
