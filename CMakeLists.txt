@@ -20,7 +20,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 #TODO ggf checken ob beim MIME + DCA überhaupt benötigt wird, dann hier rein schieben
 include_directories(extern)
 #including static library for sam2counts
-link_directories(../libs)
+#link_directories(../libs)
 
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 

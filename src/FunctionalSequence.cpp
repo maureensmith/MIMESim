@@ -53,7 +53,7 @@ const double FunctionalSequence::getKd(const Mutation& p) {
 unsigned int FunctionalSequence::getVectorIndex(const Mutation& m) {
     auto& c =  constants::Constants::get_instance();
     //all positions x symbols before (+ 1 for actual position -1 as index starts at 0) + the symbol of the actual position
-    return ((m.getPosition()-1)*(c.Q-1));
+    return ((m.getPosition()-1)*(c.Q-1) + m.getSymbol());
 }
 
 //TODO test

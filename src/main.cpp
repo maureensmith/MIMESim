@@ -69,6 +69,12 @@ int main(int argc, const char * argv[]) {
     diff = end-start;
     std::cout << "Duration: " << diff.count() << " s\n";
 
+    //TODO doppelt, weg damit, aber für Testzwecke wars hier
+    std::cout << "****** Write true values to files *******" << std::endl;
+    effects.writeEpistasisToFile(outputPath / "pairwise_epistasis.txt");
+    effects.writeKdsToFile(outputPath / "single_kds.txt");
+
+
     std::cout << "****** Create species *******" << std::endl;
     start = std::chrono::high_resolution_clock::now();
    // Create M species, the map contains the counts for each sampled sequence id
