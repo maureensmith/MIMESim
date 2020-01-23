@@ -35,27 +35,28 @@ namespace species
             return species::specIdxToMutPos(this->specId);
     }
 
-    ref::ref_map Species::createRead() {
-        constants::Constants& constants = constants::Constants::get_instance();
-        ref::ref_map read;
-        read.reserve(constants.L);
-        for(unsigned i=1; i <= constants.L; ++i) {
-            //TODO Workaround to set wildtype to A and mutations to C
-            read.add({i, nucleotid::nucleobase{1}});
-        }
-
-        for(auto& mutPos:mutatedPositions) {
-            auto pos = std::find_if(read.begin(), read.end(), [&mutPos](const auto& val)
-            {
-                return val.first == mutPos.getPosition();
-            });
-            if(pos != read.end())
-                read.remove(pos);
-            //TODO workaround: add the mutation as nucleobase, here simply  + 1 (->wt=A=1), create a wt to mut interpretation, or make it more general also for AA...and +1 since muts start at 0
-            read.add({mutPos.getPosition(), nucleotid::nucleobase{int(mutPos.getSymbol()+1+1)}});
-        }
-        return read;
-    }
+    //TODO weg
+//    ref::ref_map Species::createRead() {
+//        constants::Constants& constants = constants::Constants::get_instance();
+//        ref::ref_map read;
+//        read.reserve(constants.L);
+//        for(unsigned i=1; i <= constants.L; ++i) {
+//            //TODO Workaround to set wildtype to A and mutations to C
+//            read.add({i, nucleotid::nucleobase{1}});
+//        }
+//
+//        for(auto& mutPos:mutatedPositions) {
+//            auto pos = std::find_if(read.begin(), read.end(), [&mutPos](const auto& val)
+//            {
+//                return val.first == mutPos.getPosition();
+//            });
+//            if(pos != read.end())
+//                read.remove(pos);
+//            //TODO workaround: add the mutation as nucleobase, here simply  + 1 (->wt=A=1), create a wt to mut interpretation, or make it more general also for AA...and +1 since muts start at 0
+//            read.add({mutPos.getPosition(), nucleotid::nucleobase{int(mutPos.getSymbol()+1+1)}});
+//        }
+//        return read;
+//    }
 
     const unsigned int Species::getSpecId() const {
         return specId;

@@ -18,8 +18,6 @@
 #include "Mutation.hpp"
 #include "Count.hpp"
 
-#include "sam2counts/ref_map.hpp"
-
 namespace species {
     //TODO weg nach test
     //typedef std::array<unsigned int, Constants::MAX_MUT> mutArr;
@@ -97,9 +95,9 @@ namespace species {
 
         void computeSpeciesKd();
 
+        //TODO weg
         //const ref::ref_map &getRead() const;
-
-        ref::ref_map createRead();
+        //ref::ref_map createRead();
 
         unsigned int getMutCountBound() const;
 

@@ -7,7 +7,6 @@
 //
 
 #include <iostream>
-#include <algorithm>
 #include <filesystem>
 #include <fstream>
 #include <chrono>
@@ -15,13 +14,8 @@
 #include "Constants.hpp"
 #include "Species.hpp"
 #include "Utils.hpp"
-#include "Mutation.hpp"
 #include "FunctionalSequence.hpp"
 #include "BindingCompetition.hpp"
-
-//#include "sam2counts/reference.hpp"
-//#include "sam2counts/nucleobase.hpp"
-//#include "sam2counts/count.hpp"
 #include "Count.hpp"
 
 namespace fs = std::filesystem;
@@ -138,217 +132,19 @@ int main(int argc, const char * argv[]) {
     diff = end-start;
     std::cout << "Duration: " << diff.count() << " s\n";
 
-    std::cout << "****** Add noise *******" << std::endl;
+    std::cout << "****** Add noise and Count *******" << std::endl;
     start = std::chrono::high_resolution_clock::now();
     //Carefull: The map is extended by species that occur only because of sequencing error, hence the length of S_bound and
     //S_unbound dont fit any more with the length of the map
     //TODO: Umbau nach counts
+    //TODO weg
     //species::addCountsWithError(S_bound, S_unbound, species_vec);
 
     //species::addCountsWithError(S_bound_wt, S_unbound_wt, wtSpecies_vec);
 
     auto counters = species::countMutationsWithErrors(S_bound, S_unbound, species_vec);
 
-    end = std::chrono::high_resolution_clock::now();
-    diff = end-start;
-    std::cout << "Duration: " << diff.count() << " s\n";
-
-
-    exit(0);
-/*
-
-    std::cout << "****** Count Mut Library *******" << std::endl;
-    start = std::chrono::high_resolution_clock::now();
-    // create reference (here only As, Cs Gs and Us are mutations)
-    ref::reference ref;
-    ref::ref_map wt_read;
-    wt_read.reserve(cons.L);
-    for(int i=1; i <=cons.L; ++i) {
-        ref.add(nucleotid::nucleobase{1});
-        wt_read.add({i, nucleotid::nucleobase{'A'}});
-    }
-    //count for mutation library
-    count::counter_1 counter_bound_1d{ref};
-    count::counter_1 counter_unbound_1d{ref};
-
-    //Because the majority is wildtype, count all als wildtype....
-    count::counter_2 counter_bound_2d{ref};
-    //TODO: Umbau nach counts
-    //counter_bound_2d.count(wt_read, round(cons.M*f_bound_tot.sum()));
-    counter_bound_2d.count(wt_read, S_bound.sum());
-    count::counter_2 counter_unbound_2d{ref};
-    //TODO: Umbau nach counts
-    //counter_unbound_2d.count(wt_read, round(cons.M*f_unbound_tot.sum()));
-    counter_unbound_2d.count(wt_read, S_unbound.sum());
-    //count::counter_3 counter_bound{ref};
-    //count::counter_3 counter_unbound{ref};
-
-
-    std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
-
-
-
-    //for each species: set up read, and let it count the nucleotides
-     int i = 0;
-    for(auto& spec : species_vec) {
-//        std::cout << "bound "<< spec.second.getMutCountBound()<< std::endl;
-//        std::cout << "bound error " << spec.second.getErrorCountBound() << std::endl;
-//        std::cout << "unbound "<< spec.second.getMutCountUnbound() << std::endl;
-//        std::cout << "unbound error "<< spec.second.getErrorCountUnbound() << std::endl;
-        //TODO auch noch schneller machen
-
-        const int times_bound = spec.second.getMutCountBound() + spec.second.getErrorCountBound();
-        const int times_unbound = spec.second.getMutCountUnbound() + spec.second.getErrorCountUnbound();
-        //TODO workaround, anders lösen
-        auto read = spec.second.createRead();
-        counter_bound_1d.count(read, times_bound);
-        counter_unbound_1d.count(read, times_unbound);
-
-        counter_bound_2d.count(read, times_bound);
-        counter_unbound_2d.count(read, times_unbound);
-
-        //if (spec.first < 100) {
-            //std::cout << "id " << spec.first << " countTot " << spec.second.getCount() << " bound " << times_bound
-            //      << " unbound " << times_unbound << std::endl;
-           // std::cout << " id: " << spec.first << " " << spec.second.getNumMut() << " " << spec.second.getCount() << " " <<  double(times_unbound)/spec.second.getCount()
-            //          << " " << double(times_bound)/spec.second.getCount()  <<std::endl;
-        //}
-
-//        for(auto mut1:spec.second.getMutatedPositions()) {
-//
-//            //.... substract the ones where position 1 is mutated, and count as wt mut
-//            for(unsigned mut2=1; mut2 <= cons.L; ++mut2) {
-//                if (mut1.getPosition() < mut2) {
-//                    counter_bound_2d.count(mut1, mut2, 'A', 'A', -times_bound);
-//                    counter_bound_2d.count(mut1, mut2, 'C', 'A', times_bound);
-//                    counter_unbound_2d.count(mut1, mut2, 'A', 'A', -times_unbound);
-//                    counter_unbound_2d.count(mut1, mut2, 'C', 'A', times_unbound);
-//                } else if(mut1 > mut2) {
-//                    counter_bound_2d.count(mut2, mut1, 'A', 'A', -times_bound);
-//                    counter_bound_2d.count(mut2, mut1, 'A', 'C', times_bound);
-//                    counter_unbound_2d.count(mut2, mut1, 'A', 'A', -times_unbound);
-//                    counter_unbound_2d.count(mut2, mut1, 'A', 'C', times_unbound);
-//                }
-//            }
-//            //... substruct again from the wt mut, and at for mut mut... as this vector is very short anyway (max 4 or 5)
-//            for(auto pos2:spec.second.getMutatedPositions()) {
-//                if (mut1 < pos2) {
-//                    counter_bound_2d.count(mut1, pos2, 'C', 'A', -times_bound);
-//                    counter_bound_2d.count(mut1, pos2, 'A', 'C', -times_bound);
-//                    counter_bound_2d.count(mut1, pos2, 'C', 'C', times_bound);
-//                    counter_unbound_2d.count(mut1, pos2, 'C', 'A', -times_unbound);
-//                    counter_unbound_2d.count(mut1, pos2, 'A', 'C', -times_unbound);
-//                    counter_unbound_2d.count(mut1, pos2, 'C', 'C', times_unbound);
-//                }
-//
-//                //TODO: hier wird doppelt gezählt, da ich 2 mal durch alle mutierten positionen gehe -> WEG
-////                else if(mut1 > pos2) {
-////                    counter_bound_2d.count(pos2, mut1, 'A', 'C', -times_bound);
-////                    counter_bound_2d.count(pos2, mut1, 'C', 'C', times_bound);
-////                    counter_unbound_2d.count(pos2, mut1, 'A', 'C', -times_unbound);
-////                    counter_unbound_2d.count(pos2, mut1, 'C', 'C', times_unbound);
-////                }
-//            }
-//
-//        }
-
-        //counter_bound_2d.count(spec.second.getRead(), spec.second.getMutCountBound() + spec.second.getErrorCountBound());
-        //counter_unbound_2d.count(spec.second.getRead(), spec.second.getMutCountUnbound() + spec.second.getErrorCountUnbound());
-        //++i;
-        //if(i == 250000)
-            //break;
-    }
-
-    end = std::chrono::high_resolution_clock::now();
-    diff = end-start;
-    std::cout << "Duration: " << diff.count() << " s\n";
-
-//    std::cout << std::endl;
-//    std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
-//    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>( t2 - t1 ).count();
-
-   // std::cout <<"Time with L=" << L << " specVec " << species_vec.size() << " " <<duration <<std::endl;
-
-    std::cout << "****** Count Wt Library *******" << std::endl;
-    start = std::chrono::high_resolution_clock::now();
-    //count for wt
-    count::counter_1 counter_bound_1d_wt{ref};
-    count::counter_1 counter_unbound_1d_wt{ref};
-
-    count::counter_2 counter_bound_2d_wt{ref};
-    //TODO: Umbau nach counts
-    //counter_bound_2d_wt.count(wt_read, round(cons.M*f_bound_tot_wt.sum()));
-    counter_bound_2d_wt.count(wt_read, S_bound_wt.sum());
-    count::counter_2 counter_unbound_2d_wt{ref};
-    //TODO: Umbau nach counts
-    //counter_unbound_2d_wt.count(wt_read, round(cons.M*f_unbound_tot_wt.sum()));
-    counter_unbound_2d_wt.count(wt_read, S_unbound_wt.sum());
-
-    t1 = std::chrono::high_resolution_clock::now();
-
-    for(auto& spec : wtSpecies_vec) {
-        //TODO auch noch schneller machen
-
-        const int times_bound = spec.second.getMutCountBound() + spec.second.getErrorCountBound();
-        const int times_unbound = spec.second.getMutCountUnbound() + spec.second.getErrorCountUnbound();
-
-        //TODO workaround, ändern?
-        auto read = spec.second.createRead();
-
-        counter_bound_1d_wt.count(read , times_bound);
-        counter_unbound_1d_wt.count(read, times_unbound);
-
-        counter_bound_2d_wt.count(read, times_bound);
-        counter_unbound_2d_wt.count(read, times_unbound);
-
-//        if (spec.first < 100) {
-//        std::cout << "id " << spec.first << " countTot " << spec.second.getCount() << " bound " << times_bound
-//              << " unbound " << times_unbound << std::endl;
-//            std::cout << " bound mut " << spec.second.getMutCountBound() <<  " bound err " << spec.second.getErrorCountBound() << std::endl;
-//            std::cout << " unbound mut " << spec.second.getMutCountUnbound() <<  " unbound err " << spec.second.getErrorCountUnbound() << std::endl;
-//        }
-
-//        for(auto pos1:spec.second.getMutatedPositions()) {
-//
-//            for(unsigned pos2=1; pos2<=cons.L; ++pos2) {
-//                if (pos1 < pos2) {
-//                    counter_bound_2d_wt.count(pos1, pos2, 'A', 'A', -times_bound);
-//                    counter_bound_2d_wt.count(pos1, pos2, 'C', 'A', times_bound);
-//                    counter_unbound_2d_wt.count(pos1, pos2, 'A', 'A', -times_unbound);
-//                    counter_unbound_2d_wt.count(pos1, pos2, 'C', 'A', times_unbound);
-//                } else if(pos1 > pos2) {
-//                    counter_bound_2d_wt.count(pos2, pos1, 'A', 'A', -times_bound);
-//                    counter_bound_2d_wt.count(pos2, pos1, 'A', 'C', times_bound);
-//                    counter_unbound_2d_wt.count(pos2, pos1, 'A', 'A', -times_unbound);
-//                    counter_unbound_2d_wt.count(pos2, pos1, 'A', 'C', times_unbound);
-//                }
-//            }
-//            for(auto pos2:spec.second.getMutatedPositions()) {
-//                if (pos1 < pos2) {
-//                    counter_bound_2d_wt.count(pos1, pos2, 'C', 'A', -times_bound);
-//                    counter_bound_2d_wt.count(pos1, pos2, 'A', 'C', -times_bound);
-//                    counter_bound_2d_wt.count(pos1, pos2, 'C', 'C', times_bound);
-//                    counter_unbound_2d_wt.count(pos1, pos2, 'C', 'A', -times_unbound);
-//                    counter_unbound_2d_wt.count(pos1, pos2, 'A', 'C', -times_unbound);
-//                    counter_unbound_2d_wt.count(pos1, pos2, 'C', 'C', times_unbound);
-//                }
-//
-//                //TODO: s.o.
-////                else if(pos1 > pos2) {
-////                    counter_bound_2d_wt.count(pos2, pos1, 'A', 'C', -times_bound);
-////                    counter_bound_2d_wt.count(pos2, pos1, 'C', 'C', times_bound);
-////                    counter_unbound_2d_wt.count(pos2, pos1, 'A', 'C', -times_unbound);
-////                    counter_unbound_2d_wt.count(pos2, pos1, 'C', 'C', times_unbound);
-////                }
-//            }
-//
-//        }
-
-    }
-
-//     t2 = std::chrono::high_resolution_clock::now();
-//    duration = std::chrono::duration_cast<std::chrono::milliseconds>( t2 - t1 ).count();
-//    std::cout <<"Time with L=" << L << " wtSpecVec " << wtSpecies_vec.size() << " " <<duration <<std::endl;
+    auto counters_wt = species::countMutationsWithErrors(S_bound_wt, S_unbound_wt, wtSpecies_vec);
 
     end = std::chrono::high_resolution_clock::now();
     diff = end-start;
@@ -365,15 +161,15 @@ int main(int argc, const char * argv[]) {
     fs::create_directory(outputPath / "2d");
     fs::create_directory(outputPath / "1d");
     //create for each barcode a textfile and write the counts into the files
-    counter_bound_1d.write_to_file(outputPath /"1d" / (mut_bound_id+".txt"));
-    counter_unbound_1d.write_to_file(outputPath / "1d" / (mut_unbound_id+".txt"));
-    counter_bound_2d.write_to_file(outputPath / "2d" / (mut_bound_id+".txt"));
-    counter_unbound_2d.write_to_file(outputPath / "2d" / (mut_unbound_id+".txt"));
+    counters.counter_bound_1d.write_to_file(outputPath /"1d" / (mut_bound_id+".txt"));
+    counters.counter_unbound_1d.write_to_file(outputPath / "1d" / (mut_unbound_id+".txt"));
+    counters.counter_bound_2d.write_to_file(outputPath / "2d" / (mut_bound_id+".txt"));
+    counters.counter_unbound_2d.write_to_file(outputPath / "2d" / (mut_unbound_id+".txt"));
 
-    counter_bound_1d_wt.write_to_file(outputPath  / "1d" / (wt_bound_id+".txt"));
-    counter_unbound_1d_wt.write_to_file(outputPath / "1d" / (wt_unbound_id+".txt"));
-    counter_bound_2d_wt.write_to_file(outputPath / "2d" / (wt_bound_id+".txt"));
-    counter_unbound_2d_wt.write_to_file(outputPath / "2d" / (wt_unbound_id+".txt"));
+    counters_wt.counter_bound_1d.write_to_file(outputPath  / "1d" / (wt_bound_id+".txt"));
+    counters_wt.counter_unbound_1d.write_to_file(outputPath / "1d" / (wt_unbound_id+".txt"));
+    counters_wt.counter_bound_2d.write_to_file(outputPath / "2d" / (wt_bound_id+".txt"));
+    counters_wt.counter_unbound_2d.write_to_file(outputPath / "2d" / (wt_unbound_id+".txt"));
 
     end = std::chrono::high_resolution_clock::now();
     diff = end-start;
@@ -408,7 +204,6 @@ int main(int argc, const char * argv[]) {
     std::cout << "Duration: " << diff.count() << " s\n";
 
     std::cout << "****** Done *******" << std::endl;
-*/
 
     return 0;
 }

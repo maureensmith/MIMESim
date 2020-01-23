@@ -3,6 +3,9 @@
 //
 
 #include "Count.hpp"
+#include <fstream>
+#include <algorithm>
+
 namespace count {
 
     void counter_1::increment(const unsigned pos, const unsigned symbol) {
@@ -19,6 +22,27 @@ namespace count {
 
     const count_type counter_1::get(const unsigned pos, const unsigned symbol) {
         return counter_1::data[pos-1][symbol-1];
+    }
+
+    void counter_1::write_to_file(const std::string& out_file, const std::string& header)
+    {
+        std::ofstream outfile(out_file);
+
+        if (outfile.good())
+        {
+            outfile << header;
+            for (unsigned i = 0; i < data.size(); ++i)
+            {
+                //print position
+                outfile << (i + 1);
+                //print counts for all possible symbols
+                std::for_each(data[i].cbegin(), data[i].cend(), [&outfile](const auto& entry)
+                {
+                    outfile << '\t' << entry;
+                });
+                outfile << '\n';
+            }
+        }
     }
 
 
@@ -56,6 +80,40 @@ namespace count {
 
     unsigned counter_2::getSymbolIndex(const unsigned symbol1, const unsigned symbol2) {
         return (symbol1-1)*q+symbol2-1;
+    }
+
+    void counter_2::write_to_file(const std::string& out_file, const std::string& header)
+    {
+        std::ofstream outfile(out_file);
+
+        if (outfile.good())
+        {
+            outfile << header;
+
+            unsigned line = 0;
+            unsigned i = 1;
+            unsigned j = 2;
+            while (line < data.size())
+            {
+                outfile << i << '\t' << j;
+                std::for_each(data[line].cbegin(), data[line].cend(), [&outfile](const auto& entry)
+                {
+                    outfile << '\t' << entry;
+                });
+                outfile << '\n';
+
+                ++line;
+                if (j == L)
+                {
+                    ++i;
+                    j = i + 1;
+                }
+                else
+                {
+                    ++j;
+                }
+            }
+        }
     }
 
 }

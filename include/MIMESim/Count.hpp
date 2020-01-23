@@ -36,7 +36,13 @@ namespace count {
 
         const count_type get(const unsigned pos, const unsigned symbol);
 
-        void write_to_file(const std::string &out_file);
+        /**
+         *
+         * @param out_file
+         * @param header optional argument. If it is not given, it is assumed that we have nucleotides
+         */
+        void write_to_file(const std::string &out_file, const std::string& header = "pos1\tA\tC\tG\tT\n");
+
 
     private:
         //containing counts for all q nucleotides for each position (counted from 0, for input/output -1)
@@ -69,7 +75,13 @@ namespace count {
         void count(const unsigned pos, const unsigned symbol, const int times);
 
 
-        void write_to_file(const std::string &out_file);
+        /**
+         *
+         * @param out_file
+         * @param header optional argument. If it is not given, it is assumed that we have nucleotides
+         */
+        void write_to_file(const std::string &out_file,
+                           const std::string& header = "pos1\tpos2\tAA\tAC\tAG\tAT\tCA\tCC\tCG\tCT\tGA\tGC\tGG\tGT\tTA\tTC\tTG\tTT\n");
 
     private:
         unsigned L;

@@ -32,8 +32,6 @@ target_include_directories(MIMESim PUBLIC ../include/MIMESim)
 #set_property(TARGET DCABenchmark PROPERTY POSITION_INDEPENDENT_CODE 1)
 target_link_libraries(MIMESim Eigen3::Eigen)
 target_link_libraries(MIMESim stdc++fs)
-target_link_libraries(MIMESim sam2counts)
-
 
 add_executable(MIMESim_prog
         main.cpp
