@@ -100,9 +100,10 @@ namespace constants {
         // create_instance() function.
         //TODO: workaround, 3 mal die gleiche routine (computeMaxMut) aufrufen, weil es erst am  ende alles gespeichert wird, anders lösen?
         // Lösung siehe Species: indexToMutPos, erst aufruf ohne parameter um dann den member parameter mitugeben.
+        //TODO: computeMaxMut mit p_mut/q-1, da ja p_mut die wkeit ist dass eine position überhaupt mutiert, aber nicht fpr jede einzelne muation
         Constants(unsigned int length, unsigned int q, double p_mut, double p_error, double p_effect, double p_epistasis, fs::path outputDir) :
                 L(length), SVal(length * (q-1)), PWVal((length * (length - 1) / 2)*std::pow(q-1,2)), Q(q), P_MUT(p_mut), P_ERR(p_error), P_EFFECT(p_effect), P_EPISTASIS(p_epistasis),
-                MAX_MUT(computeMaxMut(length,p_mut)), NMUT_RANGE(setNMutRange(computeMaxMut(length,p_mut),L, q)), P_NMUT(setP_NMut(computeMaxMut(length,p_mut),length,p_mut)), OUTPUT_DIR(outputDir) {};
+                MAX_MUT(computeMaxMut(length,p_mut/(q-1))), NMUT_RANGE(setNMutRange(computeMaxMut(length,p_mut/(q-1)),L, q)), P_NMUT(setP_NMut(computeMaxMut(length,p_mut/(q-1)),length,p_mut)), OUTPUT_DIR(outputDir) {};
         //Constants(unsigned int length, unsigned int q, double p_mut) : L(length),PWVal(L*(L-1)/2), Q(q), P_MUT(p_mut), NMUT_RANGE(setNMutRange()), P_NMUT(setP_NMut()) {};
     };
 }

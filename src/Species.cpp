@@ -297,7 +297,8 @@ namespace species
         // draw number of errors, but only allow a maxmimum of MAX MUT mutations+errors in total //TODO vllt mal ändern und nicht nur bis 4 gehen?
         int numErrors = bino(generator);
         //TODO mal ausporbieren wenn ich mehr error erlaube,
-        numErrors = std::min<int>(numErrors, constants.MAX_MUT*2 - mutations.size());
+        //TODO: mal weg lassen, da ich ja eh keine species berechne
+        //numErrors = std::min<int>(numErrors, constants.MAX_MUT*2 - mutations.size());
 
         //containing numErrors Mutations with unique position
         std::set<Mutation> uniquePositions;
@@ -470,6 +471,7 @@ namespace species
                 for (const auto& mut : mutatedPositions) {
                     auto it = uniquePositions.find(mut);
                     if (it != uniquePositions.end()) {
+                        //+1 because symbols start from 1, +1 because wt is 1
                         auto mutSymbol = mut.getSymbol()+2;
                         auto errorSymbol = it->getSymbol()+2;
                         counter_1d.decrement(mut.getPosition(), mutSymbol);
@@ -524,7 +526,6 @@ namespace species
         }
 
         int specIdx = 0;
-        //TODO mit erase... aber wie?
         //for (auto it = spec_map.begin(); it != spec_map.end(); ) {
         for(auto it = spec_map.begin(); it != spec_map.end(); ++it) {
 
@@ -603,6 +604,7 @@ namespace species
     }
 
     //TODO: Umbau nach counts
+    //TODO weg
     //void addCountsWithError(const std::valarray<double>& freqBound, const std::valarray<double>& freqUnbound, species_map& spec_map) {
     void addCountsWithError(const std::valarray<unsigned int>& SBound, const std::valarray<unsigned int>& SUnbound, species_map& spec_map) {
         constants::Constants& cons = constants::Constants::get_instance();

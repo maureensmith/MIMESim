@@ -32,7 +32,6 @@ int main(int argc, const char * argv[]) {
     }
 
     if(!fs::exists(outputPath)){
-        //fs::path outpath(outputPath);
         fs::create_directory(outputPath);
         std::cout << "Create output directory " << fs::canonical(outputPath) << std::endl;
     } else {
@@ -43,6 +42,8 @@ int main(int argc, const char * argv[]) {
 
     // get the newly created instance of the constants
     auto& cons = constants::Constants::get_instance();
+
+    std::cout << "MaxMut "<< cons.MAX_MUT << std::endl;
 
     // The 4 output files are saved with their ids where wild_type_bound = firstId, wild_type_unbound = firstId+1,
             // mut_bound = firstId+2, mut_unbound = firstId+3
@@ -182,16 +183,25 @@ int main(int argc, const char * argv[]) {
     std::cout << "Duration: " << diff.count() << " s\n";
 
     std::cout << "****** Write true values to files *******" << std::endl;
+    std::cout << "Write epistasis" << std::endl;
     effects.writeEpistasisToFile(outputPath / "pairwise_epistasis.txt");
+    std::cout << "Write KD" << std::endl;
     effects.writeKdsToFile(outputPath / "single_kds.txt");
 
     //write pairwise effects: species ids after 1(0 mut), and 2-L+1 (1 mut)
+    std::cout << "Write pairwise effects" << std::endl;
+    //TODO: statt über die id (die auch nicht vorkommen können) einfach über alle möglichkeiten kd berechnen
     std::ofstream outfile(outputPath / "pairwise_kds.txt");
     if (outfile.good())
     {
-
         for(int i=cons.NMUT_RANGE[1]+1; i<=cons.NMUT_RANGE[2];++i) {
-            outfile << species_vec.at(i).getKd() << '\n';
+            auto specIt = species_vec.find(i);
+            if(specIt != species_vec.end()) {
+                outfile << specIt->second.getKd() << '\n';
+            } else {
+                outfile << "--" << '\n';
+            }
+
         }
         outfile.close();
     }

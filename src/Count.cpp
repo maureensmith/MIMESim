@@ -75,7 +75,9 @@ namespace count {
 
     unsigned counter_2::getPositionIndex(const unsigned pos1, const unsigned pos2)
     {
-        return (pos1-1)*(L-pos1-1)+pos2-pos1-1;
+        return double(pos1-1)*(double(L) - double(pos1)/2 ) + pos2 - pos1 - 1;
+        //weg
+        //return (pos1-1)*(L-(pos1-1))+pos2-pos1-1;
     }
 
     unsigned counter_2::getSymbolIndex(const unsigned symbol1, const unsigned symbol2) {

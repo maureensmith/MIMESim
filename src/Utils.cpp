@@ -54,6 +54,7 @@ namespace utils {
 
 
     //TODO ist das nicht schon in Species? Welches ist jetzt besser??
+    //TODO kann dann weg? zumindest auskommentieren, weil es erstmal nicht benutzt wird.
     mutatedPositions specIdxToMutPos(const unsigned long specIdx, const unsigned int L, const unsigned int numSymbols,
                                      const std::vector<unsigned int> &nMutRange) {
         mutatedPositions mutPos{};
@@ -202,7 +203,6 @@ namespace utils {
             } else {
                 //...if no config file is given, create the constants with the default parameter values
                 std::cout << "No parameter file given. Using default parameters." << std::endl;
-                //TODO so oder so noch die parameter ausgeben.
                 //TODO test case für parameter einlesen
             }
 
@@ -212,7 +212,6 @@ namespace utils {
                                                                                outputPath);
             writeParameters();
         } else {
-            //TODO throw exception
             std::cerr << "Output path is a mandatory parameter" << std::endl;
             throw std::invalid_argument("Output path is a mandatory parameter");
             //std::exit(1);

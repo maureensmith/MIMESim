@@ -31,6 +31,7 @@ target_include_directories(MIMESim PUBLIC ../include/MIMESim)
 # shared libraries need PIC
 #set_property(TARGET DCABenchmark PROPERTY POSITION_INDEPENDENT_CODE 1)
 target_link_libraries(MIMESim Eigen3::Eigen)
+#is linked automatically with gcc-9
 target_link_libraries(MIMESim stdc++fs)
 
 add_executable(MIMESim_prog

@@ -1,10 +1,10 @@
 
-find_package(Catch2 REQUIRED)
 #enable CTest
 enable_testing()
+#find_package(Catch2 REQUIRED)
 #enables testing and set a BUILD_TESTING option so users can turn testing on and off
 include(CTest)
-include(Catch)
+#include(Catch)
 
 # the sources are necessary for all tests
 set(CATCH_SOURCES catch.hpp test_main.cpp)
@@ -31,8 +31,10 @@ target_include_directories(TestSpecies PUBLIC ../include/DCABenchmark)
 target_include_directories(TestConstants PUBLIC ../include/DCABenchmark)
 
 # linking to the main library, as well as the Catch2 testing library
-target_link_libraries(TestSpecies PRIVATE DCABenchmark Catch2::Catch2)
-target_link_libraries(TestConstants PRIVATE DCABenchmark Catch2::Catch2)
+#target_link_libraries(TestSpecies PRIVATE DCABenchmark Catch2::Catch2)
+#target_link_libraries(TestConstants PRIVATE DCABenchmark Catch2::Catch2)
+target_link_libraries(TestSpecies PRIVATE DCABenchmark)
+target_link_libraries(TestConstants PRIVATE DCABenchmark)
 
 
 

@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
-project(MIMESim)
+# soll man eigentlich nicht, aber ist nötig für filesystem
+
+project(MIMESim CXX)
+
 #Option to run Unit Tests
 option(MIMESimTest_WITH_COV "Enable profiling and coverage report analysis" OFF)
 option(UNIT_TESTING "Enable Unit Testing" ON)
@@ -19,6 +22,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 #include_directories(extern MIMESim TestMIMESim)
 #TODO ggf checken ob beim MIME + DCA überhaupt benötigt wird, dann hier rein schieben
 include_directories(extern)
+#TODO ggc noch Egien hier mit aufnehmen, sonst muss es irgendwo vorhanden sein
 #including static library for sam2counts
 #link_directories(../libs)
 

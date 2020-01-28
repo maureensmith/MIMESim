@@ -1,0 +1,10 @@
+### paratemers regarding kd sampling ###
+kd_wt	1
+p_effect	0.5
+p_epistasis	0.3
+### paramters regarding sequence sampling ###
+L	20
+q	4
+M	12000000
+p_mut	0.1
+p_error	0.01

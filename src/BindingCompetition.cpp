@@ -7,13 +7,22 @@
 #include <chrono>
 #include <random>
 
-//TODO weg
+//TODO weg -> wieso?
 std::valarray<kd_type> UnboundProtein::getSpeciesKds(const species::species_map& spec) {
     std::valarray<kd_type> kds(spec.size());
     unsigned i=0;
     for(auto& s:spec) {
     //for(int i=0; i < spec.size(); ++i) {
         kds[i] = (s.second).getKd();
+        //TODO weg
+//        if(s.second.getNumMut() < 3) {
+//            std::cout << "i " << i;
+//            std::cout << " id " << s.first << " kd " << s.second.getKd();
+//            for (auto &blub : s.second.getMutatedPositions()) {
+//                std::cout << " mut " << blub.getPosition() << "-" << blub.getSymbol();
+//            }
+//            std::cout << std::endl;
+//        }
         ++i;
     }
     return kds;
@@ -109,15 +118,15 @@ double UnboundProtein::solve(std::valarray<count_type>& S_bound, std::valarray<c
     //The remaining counts of per species are the unbound
     S_unbound = counts - S_bound;
 
-
-    //std::cout << S_bound.size() << std::endl;
-    //for(int i = 0; i < kds.size(); ++i ){
-        //S_bound[i] = round((B[0]*counts[i])/(kds[i]+double(B[0])));
-        //S_unbound[i] = counts[i] - S_bound[i];
-        //std::cout << "freq " << frequencies[i] << " ";
-        //std::cout << i << " " << S_bound[i] << " " << S_unbound[i] << std::endl;
-
-    //}
+//TODO weg
+//    std::cout << S_bound.size() << std::endl;
+//    for(int i = 0; i < kds.size(); ++i ){
+//        //S_bound[i] = round((B[0]*counts[i])/(kds[i]+double(B[0])));
+//        //S_unbound[i] = counts[i] - S_bound[i];
+//        std::cout << "freq " << frequencies[i] << " ";
+//        std::cout << i << " " << S_bound[i] << " " << S_unbound[i] << std::endl;
+//        std::cout << round((B[0]*counts[i])/(kds[i]+double(B[0]))) << " " <<  counts[i] - S_bound[i] << std::endl;
+//    }
 
     return B[0] ;
 }
