@@ -14,6 +14,7 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <random>
 #include <unordered_map>
 #include "Mutation.hpp"
 #include "Count.hpp"
@@ -30,20 +31,6 @@ namespace species {
     //typedef std::map<int, std::array<int, 2>> idCountMap;
     //TODO umändern in unordered_map und vergleichen
     typedef std::unordered_map<int, int> idCountMap;
-
-    //TODO weg?
-    //idCountMap drawSpeciesIds();
-
-    unsigned drawError(const unsigned id, const unsigned numMut);
-
-    std::set<Mutation> drawError_2(mutVector& mutations);
-
-    mutVector specIdxToMutPos(const unsigned specId);
-
-    unsigned mutPosToSpecIdx(const mutVector& mutPos);
-
-    unsigned getNumberOfMutationsById(const unsigned specId);
-
 
     
     class Species {
@@ -133,13 +120,15 @@ namespace species {
 
     using species_map = std::unordered_map<int, Species>;
 
+    mutVector specIdxToMutPos(const unsigned specId);
+
+    unsigned mutPosToSpecIdx(const mutVector& mutPos);
+
+    unsigned getNumberOfMutationsById(const unsigned specId);
+
     species_map drawSpeciesIds();
 
-    //TODO: Umbau nach counts
-    //void addCountsWithError(const std::valarray<double>& freqBound, const std::valarray<double>& freqUnbound,
-     //                       species_map& spec_map);
-    void addCountsWithError(const std::valarray<unsigned int>& SBound, const std::valarray<unsigned int>& SUnbound,
-                            species_map& spec_map);
+    std::set<Mutation> drawError_2(const mutVector& mutations, std::default_random_engine& generator);
 
     count::counter_collection countMutationsWithErrors(const std::valarray<unsigned int>& SBound, const std::valarray<unsigned int>& SUnbound,
                                   const species_map& spec_map);

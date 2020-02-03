@@ -70,11 +70,6 @@ int main(int argc, const char * argv[]) {
     diff = end-start;
     std::cout << "Duration: " << diff.count() << " s\n";
 
-    //TODO doppelt, weg damit, aber für Testzwecke wars hier
-    std::cout << "****** Write true values to files *******" << std::endl;
-    effects.writeEpistasisToFile(outputPath / "pairwise_epistasis.txt");
-    effects.writeKdsToFile(outputPath / "single_kds.txt");
-
 
     std::cout << "****** Create species *******" << std::endl;
     start = std::chrono::high_resolution_clock::now();
@@ -149,8 +144,10 @@ int main(int argc, const char * argv[]) {
 
     //species::addCountsWithError(S_bound_wt, S_unbound_wt, wtSpecies_vec);
 
+    std::cout << "Mutation Library" << std::endl;;
     auto counters = species::countMutationsWithErrors(S_bound, S_unbound, species_vec);
 
+    std::cout << "Wild type Library" << std::endl;;
     auto counters_wt = species::countMutationsWithErrors(S_bound_wt, S_unbound_wt, wtSpecies_vec);
 
     end = std::chrono::high_resolution_clock::now();
@@ -183,25 +180,32 @@ int main(int argc, const char * argv[]) {
     std::cout << "Duration: " << diff.count() << " s\n";
 
     std::cout << "****** Write true values to files *******" << std::endl;
+    start = std::chrono::high_resolution_clock::now();
     std::cout << "Write epistasis" << std::endl;
     effects.writeEpistasisToFile(outputPath / "pairwise_epistasis.txt");
     std::cout << "Write KD" << std::endl;
     effects.writeKdsToFile(outputPath / "single_kds.txt");
 
-    //write pairwise effects: species ids after 1(0 mut), and 2-L+1 (1 mut)
+    end = std::chrono::high_resolution_clock::now();
+    diff = end-start;
+    std::cout << "Duration: " << diff.count() << " s\n";
+    start = std::chrono::high_resolution_clock::now();
+    //write pairwise effects
     std::cout << "Write pairwise effects" << std::endl;
-    //TODO: statt über die id (die auch nicht vorkommen können) einfach über alle möglichkeiten kd berechnen
     std::ofstream outfile(outputPath / "pairwise_kds.txt");
     if (outfile.good())
     {
-        for(int i=cons.NMUT_RANGE[1]+1; i<=cons.NMUT_RANGE[2];++i) {
-            auto specIt = species_vec.find(i);
-            if(specIt != species_vec.end()) {
-                outfile << specIt->second.getKd() << '\n';
-            } else {
-                outfile << "--" << '\n';
+        for(unsigned pos1=1; pos1<cons.L; ++pos1) {
+            for(unsigned pos2=pos1+1; pos2<=cons.L; ++pos2) {
+                for(unsigned sym1=0; sym1 <cons.Q-1; ++sym1) {
+                    Mutation mut1{pos1, sym1};
+                    for(unsigned sym2=0; sym2<cons.Q-1; ++sym2) {
+                        Mutation mut2{pos2, sym2};
+                        auto doubleKd = effects.getKd(mut1)*effects.getKd(mut2)*effects.getEpistasis(mut1, mut2);
+                        outfile << doubleKd << '\n';
+                    }
+                }
             }
-
         }
         outfile.close();
     }

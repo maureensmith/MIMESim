@@ -15,7 +15,6 @@
 #include <valarray>
 #include <iostream>
 #include <chrono>
-#include <random>
 #include <set>
 #include <cmath>
 #include <Count.hpp>
@@ -220,71 +219,12 @@ namespace species
         return species_map;
     }
 
-    //TODO schneller machen in dem nicht immer neuer generator und verteilung erstellt wird?
-    //TODO testen für q>2
-    unsigned drawError(const unsigned id, const unsigned numMut) {
+
+    //TODO testen
+    std::set<Mutation> drawError_2(const mutVector& mutations, std::default_random_engine& generator) {
         auto& constants = constants::Constants::get_instance();
-        const auto seed = static_cast<unsigned int>(std::chrono::system_clock::now().time_since_epoch().count());
-        std::default_random_engine generator (seed);
-        std::binomial_distribution<int> bino(constants.L,constants.P_ERR);
-        //random generator for the position with an error
-        std::uniform_int_distribution<> unif_err(1,constants.L);
-        //random generator for the mutated symbol (if sequence symbol is wt, the errror is one of the mutations;
-        // if the sequence symbol is mutated, the according symbol is the wild type or one of the other mutations
-        std::uniform_int_distribution<> unif_sym(1,constants.Q-1);
-
-        // if no errors: id stays the same
-        unsigned newId = id;
-        // draw number of errors, but only allow a maxmimum of MAX MUT mutations+errors in total //TODO vllt mal ändern und nicht nur bis 4 gehen?
-        int numErrors = bino(generator);
-        //TODO mal ausporbieren wenn ich mehr error erlaube,
-        numErrors = std::min<int>(numErrors, constants.MAX_MUT*2 - numMut);
-
-        if(numErrors > 0) {
-            mutVector mutations = species::specIdxToMutPos(id);
-            //containing numErrors positions with error
-            //std::set<int> uniquePositions;
-            //containing numErrors Mutations with unique position
-            std::set<Mutation> uniquePositions;
-            while(uniquePositions.size() < numErrors) {
-                //draw position with error
-                auto position = unif_err(generator);
-                //...and the symbol
-                auto symbol = unif_sym(generator);
-                //first time we sample this position
-                uniquePositions.emplace(position, symbol);
-            }
-
-            //if a real mutation has error, the according symbol need to be updated. In case it turns into wild type delete it
-            for(auto& mut : mutations) {
-                auto it=uniquePositions.find(mut);
-                if(it != uniquePositions.end()) {
-                    //TODO QUESTION teuer, aber selten.... machen?
-                    //in case the real mutations symbol is drawn, read it as wild type and delete from list
-                    if(it->getSymbol() == mut.getSymbol())
-                        uniquePositions.erase(it);
-                }
-                else
-                    uniquePositions.insert(mut);
-            }
-
-            //create a new species which includes both real and error mutations
-            mutVector newMutations(uniquePositions.begin(), uniquePositions.end());
-//            if(newMutations.size() > constants.MAX_MUT)
-//                std::cout << "ACHTUNG: MEHR " << newMutations.size() << std::endl;
-
-            newId = species::mutPosToSpecIdx(newMutations);
-        }
-
-        return newId;
-    }
-
-
-    //TODO nur die rückgabe der mutierten positionen, änderen mutaitons noch in numMut
-    std::set<Mutation> drawError_2(const mutVector& mutations) {
-        auto& constants = constants::Constants::get_instance();
-        const auto seed = static_cast<unsigned int>(std::chrono::system_clock::now().time_since_epoch().count());
-        std::default_random_engine generator (seed);
+        //const auto seed = static_cast<unsigned int>(std::chrono::system_clock::now().time_since_epoch().count());
+        //std::default_random_engine generator (seed);
         std::binomial_distribution<int> bino(constants.L,constants.P_ERR);
         //random generator for the position with an error
         std::uniform_int_distribution<> unif_err(1,constants.L);
@@ -292,11 +232,9 @@ namespace species
         // if the sequence symbol is mutated, the according symbol is the wild type or one of the other mutations
         std::uniform_int_distribution<> unif_sym(0,constants.Q-1-1);
 
-        // if no errors: id stays the same
-        //auto newMutations = mutations;
-        // draw number of errors, but only allow a maxmimum of MAX MUT mutations+errors in total //TODO vllt mal ändern und nicht nur bis 4 gehen?
+        // draw number of errors
         int numErrors = bino(generator);
-        //TODO mal ausporbieren wenn ich mehr error erlaube,
+
         //TODO: mal weg lassen, da ich ja eh keine species berechne
         //numErrors = std::min<int>(numErrors, constants.MAX_MUT*2 - mutations.size());
 
@@ -325,18 +263,12 @@ namespace species
         mutVector mutPos;
         mutPos.reserve(numMut);
 
-        //TODO mit q anpassen
-        //TODO weg: save the "symbol" of the mutation for each position
-        //mutVector mutSymbol(numMut);
         // check if Id is valid
         if(specId<=constants.NMUT_RANGE.back() && numMut > 0) {
             unsigned int Lact = constants.L;
             unsigned int numMutAct = numMut;
             auto mSymbols = constants.Q-1;
 
-            //TODO weg
-//            if(specId ==22)
-//                std::cout << "Blub";
             //get the id within the range of number of mutations (substract the ids for the sequences with less mutations)
             unsigned int idAct = specId - constants.NMUT_RANGE[numMut-1];
 
@@ -391,25 +323,6 @@ namespace species
         //TODO in die schleife rein, wie in Utils..
         //std::partial_sum(mutPos.begin(), mutPos.end(), mutPos.begin());
 
-        //TODO weg wenn alles getestet
-        //if(numMut==5) {
-         //   std::cout << "id: " << specId << std::endl;
-//            for (auto blub : mutPos) {
-//                std::cout << "pos " << blub.getPosition() << " mut " << blub.getSymbol() << std::endl;
-//            }
-    //    }
-            //TODO weg, hab ich ja shcon oben gelöst
-//            std::partial_sum(mutPos.begin(), mutPos.end(), mutPos.begin(),
-//                             [](const Mutation &x, const Mutation &y) {
-//                                 return Mutation(x.getPosition() + y.getPosition(), y.getSymbol());
-//                             }
-//            );
-//            std::cout << "nachher: " << std::endl;
-//            for (auto blub : mutPos) {
-//                std::cout << "pos " << blub.getPosition() << " mut " << blub.getSymbol() << std::endl;
-//            }
-//        }
-
         return(mutPos);
     }
 
@@ -463,9 +376,13 @@ namespace species
     }
 
     void countErrors(const unsigned int S, const mutVector& mutatedPositions, count::counter_1& counter_1d, count::counter_2& counter_2d) {
-        // sample error for bound sequences
+        //set up the random generator (note: when it is created in every call, the statistics are messed up (pseudo random))
+        const auto seed = static_cast<unsigned int>(std::chrono::system_clock::now().time_since_epoch().count());
+        std::default_random_engine generator (seed);
+
+        // sample error for all sequences of the bound / unbound fraction
         for(int b = 0; b<S;++b) {
-            auto uniquePositions = drawError_2(mutatedPositions);
+            auto uniquePositions = drawError_2(mutatedPositions, generator);
             if(uniquePositions.size() > 0) {
                 //if a real mutation has error, the according symbol need to be updated. In case it turns into wild type delete it
                 for (const auto& mut : mutatedPositions) {
@@ -492,6 +409,7 @@ namespace species
                 //add errors to count
                 for (const auto& err : uniquePositions) {
                     auto errorSymbol = err.getSymbol()+2;
+
                     counter_1d.decrement(err.getPosition(), 1);
                     counter_1d.increment(err.getPosition(), errorSymbol);
 
@@ -529,19 +447,6 @@ namespace species
         //for (auto it = spec_map.begin(); it != spec_map.end(); ) {
         for(auto it = spec_map.begin(); it != spec_map.end(); ++it) {
 
-//            if (it->second.getNumMut() == 1) {
-//                auto pos = it->second.getMutatedPositions()[0].getPosition();
-//                auto mut = it->second.getMutatedPositions()[0].getSymbol();
-//                std::cout << "Initial: Id " << it->first << " pos " << pos << " mut " << mut <<
-//                " all_unbound " << SUnbound[specIdx] << " 1d " << counters.counter_unbound_1d.get(pos,1) <<
-//                          " " << counters.counter_unbound_1d.get(pos,2) << " " << counters.counter_unbound_1d.get(pos,3)<< " " << counters.counter_unbound_1d.get(pos,4) <<std::endl;
-//
-//                std::cout << "Initial: Id " << it->first << " pos " << pos << " mut " << mut <<
-//                          " all_bound " << SBound[specIdx] << " 1d " << counters.counter_bound_1d.get(pos,1) <<
-//                          " " << counters.counter_bound_1d.get(pos,2) << " " << counters.counter_bound_1d.get(pos,3)<< " " << counters.counter_bound_1d.get(pos,4) <<std::endl;
-//
-//            }
-
             // add the counts for the mutated positions (and substract it from the initial wild type value
             for (auto mutIt = it->second.getMutatedPositions().begin();
                  mutIt != it->second.getMutatedPositions().end(); ++mutIt) {
@@ -574,103 +479,15 @@ namespace species
                 }
 
             }
-//            if (it->second.getNumMut() == 1) {
-//                auto pos = it->second.getMutatedPositions()[0].getPosition();
-//                auto mut = it->second.getMutatedPositions()[0].getSymbol();
-//                std::cout << "Vorher: Id " << it->first << " pos " << pos << " mut " << mut <<
-//                 " all_unbound " << SUnbound[specIdx] << " 1d " << counters.counter_unbound_1d.get(pos,1) <<
-//                " " << counters.counter_unbound_1d.get(pos,2) << " " << counters.counter_unbound_1d.get(pos,3)<< " " << counters.counter_unbound_1d.get(pos,4) <<std::endl;
-//
-//                std::cout << "Vorher: Id " << it->first << " pos " << pos << " mut " << mut <<
-//                          " all_bound " << SBound[specIdx] << " 1d " << counters.counter_bound_1d.get(pos,1) <<
-//                          " " << counters.counter_bound_1d.get(pos,2) << " " << counters.counter_bound_1d.get(pos,3)<< " " << counters.counter_bound_1d.get(pos,4) <<std::endl;
-//            }
+
             // sample error for bound sequences
             countErrors(SBound[specIdx], it->second.getMutatedPositions(), counters.counter_bound_1d,counters.counter_bound_2d);
             countErrors(SUnbound[specIdx], it->second.getMutatedPositions(), counters.counter_unbound_1d,counters.counter_unbound_2d);
-
-//            if (it->second.getNumMut() == 1) {
-//                auto pos = it->second.getMutatedPositions()[0].getPosition();
-//                auto mut = it->second.getMutatedPositions()[0].getSymbol();
-//                std::cout << "Nacher: Id " << it->first << " pos " << pos << " mut " << mut <<
-//                  " all_unbound " << SUnbound[specIdx] << " 1d " << counters.counter_unbound_1d.get(pos,1) <<
-//                          " " << counters.counter_unbound_1d.get(pos,2) << " " << counters.counter_unbound_1d.get(pos,3)<< " " << counters.counter_unbound_1d.get(pos,4) <<std::endl;
-//            }
 
             ++specIdx;
             //spec_map.erase(it++);
         }
         return counters;
-    }
-
-    //TODO: Umbau nach counts
-    //TODO weg
-    //void addCountsWithError(const std::valarray<double>& freqBound, const std::valarray<double>& freqUnbound, species_map& spec_map) {
-    void addCountsWithError(const std::valarray<unsigned int>& SBound, const std::valarray<unsigned int>& SUnbound, species_map& spec_map) {
-        constants::Constants& cons = constants::Constants::get_instance();
-        // collecting the bound(0) and unbound(1) counts for species which occur due to noise
-        std::map<int, std::array<int,2>> errCounts;
-        // to get the correct counts from the valarrays
-        int specIdx = 0;
-        for(auto it = spec_map.begin(); it != spec_map.end(); ++it) {
-            unsigned oldId = it->first;
-            // set the counts
-            //TODO: Umbau nach counts
-            //it->second.setMutCountUnbound(std::round(freqUnbound[specIdx]*cons.M));
-            //it->second.setMutCountBound(std::round(freqBound[specIdx]*cons.M));
-            it->second.setMutCountUnbound(SUnbound[specIdx]);
-            it->second.setMutCountBound(SBound[specIdx]);
-
-//            //TODO weg
-//            if(oldId <10) {
-//                std::cout << "id "<< oldId << std::endl;
-//                for(auto blub: it->second.getMutatedPositions())
-//                    std::cout << "Pos " <<blub.getPosition() << " sym " << blub.getSymbol() << std::endl;
-//                std::cout<< "unbound " << SUnbound[specIdx] << " bound " << SBound[specIdx] << std::endl;
-//            }
-
-            // sample error for bound sequences
-            for(int b = 0; b<(it->second.getMutCountBound());++b) {
-                unsigned long newId = drawError(oldId, it->second.getNumMut());
-                auto newIt = spec_map.find(newId);
-                if (newIt != spec_map.end()) {
-                    if(oldId != newId) {
-                        newIt->second.addErrorCountBound(1);
-                        it->second.addErrorCountBound(-1);
-                    }
-                } else {
-                    // in case a species is not sampled yet, put into the map with its error counts later.
-                    ++errCounts[newId][0];
-                    it->second.addErrorCountBound(-1);
-                }
-            }
-            //sample error for unbound sequences
-            for(int b = 0; b<(it->second.getMutCountUnbound());++b) {
-                unsigned long newId = drawError(oldId, it->second.getNumMut());
-                auto newIt = spec_map.find(newId);
-                if (newIt  != spec_map.end()) {
-                    if(oldId != newId) {
-                        newIt->second.addErrorCountUnbound(1);
-                        it->second.addErrorCountUnbound(-1);
-                    }
-
-                } else {
-                    // in case a species is not sampled yet, put into the map with its error counts later.
-                    ++errCounts[newId][1];
-                    it->second.addErrorCountUnbound(-1);
-                }
-            }
-            ++specIdx;
-        }
-
-        // add species which only occur because of sequencing errors
-        for(auto it = errCounts.begin(); it != errCounts.end(); ++it) {
-            auto currentObj = spec_map.emplace(it->first, it->first);
-            // first is a pointer to just constructed pair, second is the species object to call the methods
-            currentObj.first->second.setErrorCountBound(it->second[0]);
-            currentObj.first->second.setErrorCountUnbound(it->second[1]);
-        }
-
     }
 
 }
