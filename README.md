@@ -47,7 +47,7 @@ If you want to set the simulation parameters, create the *parameters.txt* file i
 | p_error         | (float)       |   probability of introducing an error (default: 0.01) |
 
 **Comments:**
-1. Right now, kd_{wt} is always 1 and also $M$ is always 12 mio, but this can be easily adjusted in the code.
+1. Right now, kd_wt is always 1 and also M is always 12 mio, but this can be easily adjusted in the code.
 2. It is only working for q=2 atm.
 3. B_tot = total protein concentration is not in the parameter setting right now.
 The amount of protein is given in relation to the amount of sequences, and is set to 2.0
