@@ -1,1 +1,0 @@
-g++ -I/Users/msmith/Documents/FUBerlin/DCA_MIME/MIMESim/extern -I/Users/msmith/Documents/FUBerlin/DCA_MIME/MIMESim/include/MIMESim -I /Users/msmith/Documents/FUBerlin/DCA_MIME/MIMESim/extern/_CppNumericalSolvers ../src/*.cpp -std=c++17 -lstdc++fs

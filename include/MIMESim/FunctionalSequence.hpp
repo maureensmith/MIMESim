@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <iostream>
+#include <random>
 #include "Mutation.hpp"
 
 class FunctionalSequence {
@@ -27,7 +28,6 @@ private:
     std::vector<double> drawKdValues();
 
 
-    // d
     /**
     * Draws the epistasis value for each PWVal (= each pair of positions and each combination of possible mutation symbols) according to log normal distribution with a probability p_epi
     * @return the vector with all Epistasis values
