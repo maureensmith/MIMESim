@@ -1,0 +1,20 @@
+BasedOnStyle: LLVM
+
+AccessModifierOffset: -4 
+AlignAfterOpenBracket: Align
+AlignOperands: true
+AllowAllConstructorInitializersOnNextLine: true
+AllowAllParametersOfDeclarationOnNextLine: true
+AllowShortBlocksOnASingleLine: Empty
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: false
+BreakBeforeBraces: Allman
+ColumnLimit: 120
+FixNamespaceComments: false
+IncludeBlocks: Regroup
+IndentCaseLabels: false
+IndentWidth: 4
+NamespaceIndentation: All
+ReflowComments: true
+TabWidth: 4
+UseTab: Never
