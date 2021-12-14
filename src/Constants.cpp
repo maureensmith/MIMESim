@@ -90,14 +90,14 @@ namespace constants
         return (p_nmut);
     };
 
-    Constants &Constants::get_instance()
+    Constants& Constants::get_instance()
     {
         if (inited)
         {
             // Guaranteed to be destroyed.
             // Instantiated on first use.
             // mock call of constructor
-            static Constants &c = create_instance(0, 0, 0, 0, 0, 0, std::filesystem::path());
+            static Constants& c = create_instance(0, 0, 0, 0, 0, 0, std::filesystem::path());
             return c;
         }
         // constexpr unsigned int L_mock = 0;
@@ -112,7 +112,7 @@ namespace constants
         }
     }
 
-    Constants &Constants::create_instance(const unsigned int length, const unsigned int q, const double p_mut,
+    Constants& Constants::create_instance(const unsigned int length, const unsigned int q, const double p_mut,
                                           const double p_error, const double p_effect, const double p_epistasis,
                                           const fs::path outputDir)
     {

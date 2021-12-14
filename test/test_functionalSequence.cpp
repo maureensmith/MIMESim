@@ -10,13 +10,13 @@
 
 TEST_CASE("Testing FunctionalSequence Class")
 {
-    constants::Constants &cons = constants::Constants::get_instance();
+    constants::Constants& cons = constants::Constants::get_instance();
 
     SECTION("test function getMatrixIndex which converts 2 indicices into the corresponding index  of a vectoral "
             "symmetric matrix")
     {
 
-        FunctionalSequence &effect = FunctionalSequence::get_instance();
+        FunctionalSequence& effect = FunctionalSequence::get_instance();
         unsigned int i;
         unsigned int j;
         unsigned int idx = 0;
@@ -35,9 +35,9 @@ TEST_CASE("Testing FunctionalSequence Class")
 
     SECTION("Test if its singleton")
     {
-        FunctionalSequence &effect = FunctionalSequence::get_instance();
+        FunctionalSequence& effect = FunctionalSequence::get_instance();
         // Kds are picked randomly. If it would not be a singleton, the second drawn effects would be different
-        FunctionalSequence &effect2 = FunctionalSequence::get_instance();
+        FunctionalSequence& effect2 = FunctionalSequence::get_instance();
         for (int i = 1; i <= cons.L; ++i)
         {
             REQUIRE(effect.getKd(i) == effect2.getKd(i));

@@ -21,11 +21,11 @@ TEST_CASE("Testing Binding Competition")
     //    const double p_effect = 0.5;
     //    const double p_epistasis = 0.3;
 
-    constants::Constants &cons = constants::Constants::get_instance();
+    constants::Constants& cons = constants::Constants::get_instance();
 
     std::cout << "****** Sample mutational effects *******" << std::endl;
     // Create Ground Truth: Effects of each mutated position and epistatic effects and sequencing noise
-    FunctionalSequence &effects = FunctionalSequence::get_instance();
+    FunctionalSequence& effects = FunctionalSequence::get_instance();
     std::vector<Mutation> mutationsPerPos_vec;
     mutationsPerPos_vec.reserve(cons.L);
     for (int i = 1; i <= cons.L; ++i)
@@ -62,7 +62,7 @@ TEST_CASE("Testing Binding Competition")
         // Test if the given equations for the ODE are fullfilled:
         // for (int i = 0; i < species_vec.size(); ++i) {
         int i = 0;
-        for (auto &spec : species_vec)
+        for (auto& spec : species_vec)
         {
             REQUIRE(S_bound_tot[i] + S_unbound_tot[i] == Approx(spec.second.getCount()));
             // TODO because S_bound is sampled from the binomial distribution, the values have to be roughly similar, b

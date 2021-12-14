@@ -37,7 +37,7 @@ namespace species
     class Species
     {
 
-    private:
+      private:
         const unsigned int specId;
         unsigned int count;
         const unsigned int numMut;
@@ -62,7 +62,7 @@ namespace species
 
         mutVector specIdxToMutPos();
 
-    public:
+      public:
         Species(const unsigned int id);
 
         const unsigned int getSpecId() const;
@@ -71,7 +71,7 @@ namespace species
 
         const unsigned int getNumMut() const;
 
-        const mutVector &getMutatedPositions() const;
+        const mutVector& getMutatedPositions() const;
 
         double getFreq() const;
 
@@ -122,17 +122,17 @@ namespace species
 
     mutVector specIdxToMutPos(const unsigned specId);
 
-    unsigned mutPosToSpecIdx(const mutVector &mutPos);
+    unsigned mutPosToSpecIdx(const mutVector& mutPos);
 
     unsigned getNumberOfMutationsById(const unsigned specId);
 
     species_map drawSpeciesIds();
 
-    std::set<Mutation> drawError_2(const mutVector &mutations, std::default_random_engine &generator);
+    std::set<Mutation> drawError_2(const mutVector& mutations, std::default_random_engine& generator);
 
-    count::counter_collection countMutationsWithErrors(const std::valarray<unsigned int> &SBound,
-                                                       const std::valarray<unsigned int> &SUnbound,
-                                                       const species_map &spec_map);
+    count::counter_collection countMutationsWithErrors(const std::valarray<unsigned int>& SBound,
+                                                       const std::valarray<unsigned int>& SUnbound,
+                                                       const species_map& spec_map);
 
 }
 #endif /* Species_hpp */

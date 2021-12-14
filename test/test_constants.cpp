@@ -23,7 +23,7 @@ TEST_CASE("Testing Constants Class", "[ConstantClassTest]")
         const double p_error = p_mut / 10;
         const double p_effect = 0.5;
         const double p_epistasis = 0.3;
-        constants::Constants &cons = constants::Constants::create_instance(length, q, p_mut, p_error, p_effect,
+        constants::Constants& cons = constants::Constants::create_instance(length, q, p_mut, p_error, p_effect,
                                                                            p_epistasis, std::filesystem::path());
         REQUIRE(cons.L == length);
         REQUIRE(cons.Q == q);
@@ -41,7 +41,7 @@ TEST_CASE("Testing Constants Class", "[ConstantClassTest]")
         double p_error = p_mut / 10;
         double p_effect = 0.2;
         double p_epistasis = 0.1;
-        constants::Constants &cons = constants::Constants::create_instance(length, q, p_mut, p_error, p_effect,
+        constants::Constants& cons = constants::Constants::create_instance(length, q, p_mut, p_error, p_effect,
                                                                            p_epistasis, std::filesystem::path());
         //        REQUIRE(cons.L == length);
         //        REQUIRE(cons.Q == q);

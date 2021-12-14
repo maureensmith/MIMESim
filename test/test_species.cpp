@@ -15,7 +15,7 @@
 
 void testSpecIdxToMutPos()
 {
-    constants::Constants &cons = constants::Constants::get_instance();
+    constants::Constants& cons = constants::Constants::get_instance();
     auto q = cons.Q;
     auto length = cons.L;
     auto numSymbols = q - 1;
@@ -73,7 +73,7 @@ void testSpecIdxToMutPos()
 TEST_CASE("Testing Species Utility methods")
 {
 
-    constants::Constants &cons = constants::Constants::get_instance();
+    constants::Constants& cons = constants::Constants::get_instance();
 
     SECTION("Test function drawSpeciesId")
     {
@@ -88,7 +88,7 @@ TEST_CASE("Testing Species Utility methods")
             numMutCounts[spec.getNumMut()] += it->second;
         }
         // Test that all number of mutations were drawn
-        for (auto &count : numMutCounts)
+        for (auto& count : numMutCounts)
         {
             REQUIRE(count > 0);
         }
@@ -128,7 +128,7 @@ TEST_CASE("Testing Species Utility methods with q > 2")
     const double p_error = p_mut / 10;
     const double p_effect = 0.5;
     const double p_epistasis = 0.3;
-    constants::Constants &cons = constants::Constants::create_instance(length, q, p_mut, p_error, p_effect, p_epistasis,
+    constants::Constants& cons = constants::Constants::create_instance(length, q, p_mut, p_error, p_effect, p_epistasis,
                                                                        std::filesystem::path());
     std::cout << "Q " << cons.Q << std::endl;
     SECTION("Test function specIdxToMutPos")
@@ -140,7 +140,7 @@ TEST_CASE("Testing Species Utility methods with q > 2")
 TEST_CASE("Testing Species Class")
 {
 
-    constants::Constants &cons = constants::Constants::get_instance();
+    constants::Constants& cons = constants::Constants::get_instance();
     // 12*10^6 * 0.1^6 * 0.9^4 = 7.8732
     REQUIRE(cons.MAX_MUT == 6);
     // TODO anpassen, wenn entschieden ist, wieviel erros (=mutationen) erlaubt sind
@@ -176,7 +176,7 @@ TEST_CASE("Testing Species Class")
     {
         unsigned int id = 12;
         species::Species spec(id);
-        auto &read = spec.getRead();
+        auto& read = spec.getRead();
         // TODO test if the read has the mutations at the correct position and length is L
 
         unsigned size = read.size();

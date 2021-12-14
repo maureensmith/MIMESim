@@ -33,7 +33,7 @@ TEST_CASE("Testing Utils", "[UtilsTest]")
 
     // TODO: WEG DAMIT wie kann ich für verschiedene Test cases verschieden set ups erstellen so dass sie innerhalb des
     // cases für alle sections gilt, aber nicht für alle cases?
-    constants::Constants &cons = constants::Constants::get_instance();
+    constants::Constants& cons = constants::Constants::get_instance();
 
     SECTION("Test  function n choose k (binomial coefficient)") {}
 }

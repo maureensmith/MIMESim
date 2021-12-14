@@ -76,26 +76,26 @@ namespace constants
         std::vector<double> setP_NMut(const unsigned int MaxMut, const unsigned L, const double pMut);
         unsigned int computeMaxMut(const unsigned int L, const double pMut);
 
-        static Constants &create_instance(const unsigned int length, const unsigned int q, const double p_mut,
+        static Constants& create_instance(const unsigned int length, const unsigned int q, const double p_mut,
                                           const double p_error, const double p_effect, const double p_epistasis,
                                           const fs::path outputDir);
         // static Constants& create_instance(const unsigned int length, const unsigned int q, const double p_mut);
 
-        static Constants &get_instance();
+        static Constants& get_instance();
 
         // The copy constructor is deleted, to prevent client code from creating new
         // instances of this class by copying the instance returned by create_instance()
-        Constants(Constants const &) = delete;
+        Constants(Constants const&) = delete;
 
         // The move constructor is deleted, to prevent client code from moving from
         // the object returned by create_instance(), which could result in other clients
         // retrieving a reference to an object with unspecified state.
-        Constants(Constants &&) = delete;
+        Constants(Constants&&) = delete;
 
-    private:
+      private:
         // a flag for showing if the singleton has already been initiated
         static bool inited;
-        static Constants &instance;
+        static Constants& instance;
 
         // Default-constructor is private, to prevent client code from creating new
         // instances of this class. The only instance shall be retrieved through the

@@ -16,7 +16,7 @@ const unsigned int Mutation::getSymbol() const
     return symbol;
 }
 
-bool Mutation::operator<(const Mutation &mut) const
+bool Mutation::operator<(const Mutation& mut) const
 {
     return this->getPosition() < mut.getPosition();
 }

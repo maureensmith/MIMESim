@@ -12,7 +12,7 @@
 #include "catch.hpp"
 
 namespace fs = std::filesystem;
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     std::cout << " blub " << std::endl;
     // TODO verschieder mains mit verschiedenen konstanten erstellen

@@ -1,6 +1,6 @@
 BasedOnStyle: LLVM
 
-AccessModifierOffset: -4 
+AccessModifierOffset: -2
 AlignAfterOpenBracket: Align
 AlignOperands: true
 AllowAllConstructorInitializersOnNextLine: true
@@ -15,6 +15,7 @@ IncludeBlocks: Regroup
 IndentCaseLabels: false
 IndentWidth: 4
 NamespaceIndentation: All
+PointerAlignment: Left
 ReflowComments: true
 TabWidth: 4
 UseTab: Never

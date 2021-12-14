@@ -66,7 +66,7 @@ namespace utils
     // TODO ist das nicht schon in Species? Welches ist jetzt besser??
     // TODO kann dann weg? zumindest auskommentieren, weil es erstmal nicht benutzt wird.
     mutatedPositions specIdxToMutPos(const unsigned long specIdx, const unsigned int L, const unsigned int numSymbols,
-                                     const std::vector<unsigned int> &nMutRange)
+                                     const std::vector<unsigned int>& nMutRange)
     {
         mutatedPositions mutPos{};
         // check if Id is valid
@@ -147,7 +147,7 @@ namespace utils
         return mutPos;
     }
 
-    void readParameters(const fs::path &outputPath)
+    void readParameters(const fs::path& outputPath)
     {
 
         if (!outputPath.empty())
@@ -225,7 +225,7 @@ namespace utils
                         infile.close();
                         std::cout << " ... successful." << std::endl;
                     }
-                    catch (const std::invalid_argument &ia)
+                    catch (const std::invalid_argument& ia)
                     {
                         // TODO anders mit umgehen?
                         std::cerr << "Error in parameter file. Invalid argument for parameter " << param << " ("
@@ -242,7 +242,7 @@ namespace utils
             }
 
             // Create constants which are used through out this test set
-            constants::Constants &cons =
+            constants::Constants& cons =
                 constants::Constants::create_instance(L, q, p_mut, p_error, p_effect, p_epistasis, outputPath);
             writeParameters();
         }
@@ -254,13 +254,13 @@ namespace utils
         }
     }
 
-    void writeParameters(const fs::path &outputPath)
+    void writeParameters(const fs::path& outputPath)
     {
 
-        auto &cons = constants::Constants::get_instance();
+        auto& cons = constants::Constants::get_instance();
 
         // initialize the stream with the
-        std::ostream *paraStream = &std::cout;
+        std::ostream* paraStream = &std::cout;
         std::ofstream ofs;
 
         if (fs::exists(outputPath) && fs::is_directory(outputPath))

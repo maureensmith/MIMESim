@@ -30,7 +30,7 @@ namespace count
         return counter_1::data[pos - 1][symbol - 1];
     }
 
-    void counter_1::write_to_file(const std::string &out_file, const std::string &header)
+    void counter_1::write_to_file(const std::string& out_file, const std::string& header)
     {
         std::ofstream outfile(out_file);
 
@@ -43,7 +43,7 @@ namespace count
                 outfile << (i + 1);
                 // print counts for all possible symbols
                 std::for_each(data[i].cbegin(), data[i].cend(),
-                              [&outfile](const auto &entry) { outfile << '\t' << entry; });
+                              [&outfile](const auto& entry) { outfile << '\t' << entry; });
                 outfile << '\n';
             }
         }
@@ -92,7 +92,7 @@ namespace count
         return (symbol1 - 1) * q + symbol2 - 1;
     }
 
-    void counter_2::write_to_file(const std::string &out_file, const std::string &header)
+    void counter_2::write_to_file(const std::string& out_file, const std::string& header)
     {
         std::ofstream outfile(out_file);
 
@@ -107,7 +107,7 @@ namespace count
             {
                 outfile << i << '\t' << j;
                 std::for_each(data[line].cbegin(), data[line].cend(),
-                              [&outfile](const auto &entry) { outfile << '\t' << entry; });
+                              [&outfile](const auto& entry) { outfile << '\t' << entry; });
                 outfile << '\n';
 
                 ++line;

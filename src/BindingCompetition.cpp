@@ -9,11 +9,11 @@
 #include <random>
 
 // TODO weg -> wieso?
-std::valarray<kd_type> UnboundProtein::getSpeciesKds(const species::species_map &spec)
+std::valarray<kd_type> UnboundProtein::getSpeciesKds(const species::species_map& spec)
 {
     std::valarray<kd_type> kds(spec.size());
     unsigned i = 0;
-    for (auto &s : spec)
+    for (auto& s : spec)
     {
         // for(int i=0; i < spec.size(); ++i) {
         kds[i] = (s.second).getKd();
@@ -32,11 +32,11 @@ std::valarray<kd_type> UnboundProtein::getSpeciesKds(const species::species_map 
 }
 
 // TODO weg
-std::valarray<frequency_type> UnboundProtein::getSpeciesFrequencies(const species::species_map &spec)
+std::valarray<frequency_type> UnboundProtein::getSpeciesFrequencies(const species::species_map& spec)
 {
     std::valarray<frequency_type> freq(spec.size());
     unsigned i = 0;
-    for (auto &s : spec)
+    for (auto& s : spec)
     {
         // for(int i=0; i < spec.size(); ++i) {
         freq[i] = s.second.getFreq();
@@ -46,11 +46,11 @@ std::valarray<frequency_type> UnboundProtein::getSpeciesFrequencies(const specie
 }
 
 // TODO: Umbau nach counts
-std::valarray<count_type> UnboundProtein::getSpeciesCounts(const species::species_map &spec)
+std::valarray<count_type> UnboundProtein::getSpeciesCounts(const species::species_map& spec)
 {
     std::valarray<count_type> count(spec.size());
     unsigned i = 0;
-    for (auto &s : spec)
+    for (auto& s : spec)
     {
         // for(int i=0; i < spec.size(); ++i) {
         count[i] = s.second.getCount();
@@ -76,7 +76,7 @@ count_type drawBinomialNumber(const unsigned int N, const double p)
 
 // TODO: Umbau nach counts
 // double UnboundProtein::solve(std::valarray<double>& S_bound, std::valarray<double>& S_unbound) {
-double UnboundProtein::solve(std::valarray<count_type> &S_bound, std::valarray<count_type> &S_unbound)
+double UnboundProtein::solve(std::valarray<count_type>& S_bound, std::valarray<count_type>& S_unbound)
 {
 
     // choose a starting point (the amount of unbound protein, in the beginning = total amount of protein)
@@ -109,7 +109,7 @@ double UnboundProtein::solve(std::valarray<count_type> &S_bound, std::valarray<c
     // auto f_unbound = frequencies - f_bound;
 
     // first sample the number of unbound sequences of the sequence variant
-    auto &constants = constants::Constants::get_instance();
+    auto& constants = constants::Constants::get_instance();
 
     //    std::transform(std::begin(f_bound), std::end(f_bound), std::begin(counts), std::begin(S_bound), [m =
     //    constants.M](const auto p, const auto s) {
@@ -150,12 +150,12 @@ const count_type UnboundProtein::getB_tot()
     return B_TOT;
 }
 
-const std::valarray<kd_type> &UnboundProtein::getKds() const
+const std::valarray<kd_type>& UnboundProtein::getKds() const
 {
     return kds;
 }
 
-const std::valarray<frequency_type> &UnboundProtein::getFrequencies() const
+const std::valarray<frequency_type>& UnboundProtein::getFrequencies() const
 {
     return frequencies;
 }

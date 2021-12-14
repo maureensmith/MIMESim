@@ -14,7 +14,7 @@
 
 std::vector<double> FunctionalSequence::drawKdValues()
 {
-    auto &constants = constants::Constants::get_instance();
+    auto& constants = constants::Constants::get_instance();
     std::vector<double> kds(constants.SVal);
     const auto seed = static_cast<unsigned int>(std::chrono::system_clock::now().time_since_epoch().count());
     std::default_random_engine generator(seed);
@@ -31,7 +31,7 @@ std::vector<double> FunctionalSequence::drawKdValues()
 
 std::vector<double> FunctionalSequence::drawEpistasis()
 {
-    auto &constants = constants::Constants::get_instance();
+    auto& constants = constants::Constants::get_instance();
     std::vector<double> epistasis(constants.PWVal);
     const auto seed = static_cast<unsigned int>(std::chrono::system_clock::now().time_since_epoch().count());
     std::default_random_engine generator(seed);
@@ -48,30 +48,30 @@ std::vector<double> FunctionalSequence::drawEpistasis()
     return epistasis;
 }
 
-FunctionalSequence &FunctionalSequence::get_instance()
+FunctionalSequence& FunctionalSequence::get_instance()
 {
     static FunctionalSequence instance;
     return instance;
 }
 
-const double FunctionalSequence::getKd(const Mutation &p)
+const double FunctionalSequence::getKd(const Mutation& p)
 {
     return kds.at(getVectorIndex(p));
 }
 
 // TODO test
-unsigned int FunctionalSequence::getVectorIndex(const Mutation &m)
+unsigned int FunctionalSequence::getVectorIndex(const Mutation& m)
 {
-    auto &c = constants::Constants::get_instance();
+    auto& c = constants::Constants::get_instance();
     // all positions x symbols before (+ 1 for actual position -1 as index starts at 0) + the symbol of the actual
     // position
     return ((m.getPosition() - 1) * (c.Q - 1) + m.getSymbol());
 }
 
 // TODO test
-unsigned int FunctionalSequence::getMatrixVectorIndex(const Mutation &a, const Mutation &b)
+unsigned int FunctionalSequence::getMatrixVectorIndex(const Mutation& a, const Mutation& b)
 {
-    auto &c = constants::Constants::get_instance();
+    auto& c = constants::Constants::get_instance();
 
     // TODO weg damit nach test?
     // i must always be smaller than j
@@ -102,37 +102,37 @@ unsigned int FunctionalSequence::getMatrixVectorIndex(const Mutation &a, const M
     return res;
 }
 
-void FunctionalSequence::writeKdsToFile(const std::string &filename)
+void FunctionalSequence::writeKdsToFile(const std::string& filename)
 {
     std::ofstream outfile(filename);
 
     if (outfile.good())
     {
-        std::for_each(kds.cbegin(), kds.cend(), [&outfile](const auto &entry) { outfile << entry << '\n'; });
+        std::for_each(kds.cbegin(), kds.cend(), [&outfile](const auto& entry) { outfile << entry << '\n'; });
     }
 }
-void FunctionalSequence::writeEpistasisToFile(const std::string &filename)
+void FunctionalSequence::writeEpistasisToFile(const std::string& filename)
 {
     std::ofstream outfile(filename);
 
     if (outfile.good())
     {
         std::for_each(epistasis.cbegin(), epistasis.cend(),
-                      [&outfile](const auto &entry) { outfile << entry << '\n'; });
+                      [&outfile](const auto& entry) { outfile << entry << '\n'; });
     }
 }
 
-const double &FunctionalSequence::getEpistasis(const Mutation &a, const Mutation &b)
+const double& FunctionalSequence::getEpistasis(const Mutation& a, const Mutation& b)
 {
     return epistasis.at(FunctionalSequence::getMatrixVectorIndex(a, b));
 }
 
-const std::vector<double> &FunctionalSequence::getKd()
+const std::vector<double>& FunctionalSequence::getKd()
 {
     return kds;
 }
 
-const std::vector<double> &FunctionalSequence::getEpistasis()
+const std::vector<double>& FunctionalSequence::getEpistasis()
 {
     return epistasis;
 }

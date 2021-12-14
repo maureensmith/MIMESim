@@ -14,7 +14,7 @@ namespace count
 
     class counter_1 final
     {
-    public:
+      public:
         // Delete default constructor
         counter_1() = delete;
 
@@ -40,16 +40,16 @@ namespace count
          * @param out_file
          * @param header optional argument. If it is not given, it is assumed that we have nucleotides
          */
-        void write_to_file(const std::string &out_file, const std::string &header = "pos1\tA\tC\tG\tT\n");
+        void write_to_file(const std::string& out_file, const std::string& header = "pos1\tA\tC\tG\tT\n");
 
-    private:
+      private:
         // containing counts for all q nucleotides for each position (counted from 0, for input/output -1)
         std::vector<std::vector<count_type>> data;
     };
 
     class counter_2 final
     {
-    public:
+      public:
         // Delete default constructor
         counter_2() = delete;
 
@@ -84,10 +84,10 @@ namespace count
          * @param header optional argument. If it is not given, it is assumed that we have nucleotides
          */
         void write_to_file(
-            const std::string &out_file,
-            const std::string &header = "pos1\tpos2\tAA\tAC\tAG\tAT\tCA\tCC\tCG\tCT\tGA\tGC\tGG\tGT\tTA\tTC\tTG\tTT\n");
+            const std::string& out_file,
+            const std::string& header = "pos1\tpos2\tAA\tAC\tAG\tAT\tCA\tCC\tCG\tCT\tGA\tGC\tGG\tGT\tTA\tTC\tTG\tTT\n");
 
-    private:
+      private:
         unsigned L;
         unsigned q;
         // containing counts for all q nucleotides for each position (counted from 0, for input/output -1)
@@ -101,7 +101,7 @@ namespace count
      */
     class counter_collection final
     {
-    public:
+      public:
         // Delete default constructor
         counter_collection() = delete;
 

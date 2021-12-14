@@ -20,7 +20,7 @@
 
 namespace fs = std::filesystem;
 
-int main(int argc, const char *argv[])
+int main(int argc, const char* argv[])
 {
 
     std::cout << "****** Set up constants *******" << std::endl;
@@ -46,7 +46,7 @@ int main(int argc, const char *argv[])
     utils::readParameters(outputPath);
 
     // get the newly created instance of the constants
-    auto &cons = constants::Constants::get_instance();
+    auto& cons = constants::Constants::get_instance();
 
     std::cout << "MaxMut " << cons.MAX_MUT << std::endl;
 
@@ -69,7 +69,7 @@ int main(int argc, const char *argv[])
     start = std::chrono::high_resolution_clock::now();
 
     // Create Ground Truth: Effects of each mutated position and epistatic effects and sequencing noise
-    FunctionalSequence &effects = FunctionalSequence::get_instance();
+    FunctionalSequence& effects = FunctionalSequence::get_instance();
 
     end = std::chrono::high_resolution_clock::now();
     diff = end - start;

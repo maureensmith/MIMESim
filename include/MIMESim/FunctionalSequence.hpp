@@ -14,7 +14,7 @@
 class FunctionalSequence
 {
 
-private:
+  private:
     // original Kd for each site
     const std::vector<double> kds;
     // original epistasis values for each position pair
@@ -43,31 +43,31 @@ private:
      * @param b Mutation 2
      * @return the Index of the Vector of the the pairwise values in the matrix (upper or lower triangle)
      */
-    unsigned int getMatrixVectorIndex(const Mutation &a, const Mutation &b);
+    unsigned int getMatrixVectorIndex(const Mutation& a, const Mutation& b);
 
     /**
      * computes index within vector of position and symbol
      * @param m Mutation = pair of position and symbol
      * @return the index within the vector
      */
-    unsigned int getVectorIndex(const Mutation &m);
+    unsigned int getVectorIndex(const Mutation& m);
 
-public:
+  public:
     /**
      * @return Vector of Kd values for or all possible mutations in ascending order.
      */
-    const std::vector<double> &getKd();
+    const std::vector<double>& getKd();
 
     /**
      * @param p Mutated position and symbol
      * @return Kd value for the given mutation.
      */
-    const double getKd(const Mutation &p);
+    const double getKd(const Mutation& p);
 
     /**
      * @return Vector of epistasis values for or all pairwise mutations in ascending order with position i<j.
      */
-    const std::vector<double> &getEpistasis();
+    const std::vector<double>& getEpistasis();
 
     //
     /**
@@ -76,29 +76,29 @@ public:
      * @param b Mutation 2
      * @return Epistasis value for the given pair of mutations
      */
-    const double &getEpistasis(const Mutation &a, const Mutation &b);
+    const double& getEpistasis(const Mutation& a, const Mutation& b);
 
     /**
      *
      * @return singleton instance of the true KD and Epistasis information
      */
-    static FunctionalSequence &get_instance();
+    static FunctionalSequence& get_instance();
 
     /**
      * Write all Kd values in consecutive order into the given outputfile, delimited by a new line
      * @param filename Outputfile
      */
-    void writeKdsToFile(const std::string &filename);
+    void writeKdsToFile(const std::string& filename);
 
     /**
      * Write all Epistasis values in consecutive order into the given outputfile, delimited by a new line
      * @param filename Outputfile
      */
-    void writeEpistasisToFile(const std::string &filename);
+    void writeEpistasisToFile(const std::string& filename);
 
-    FunctionalSequence(FunctionalSequence const &) = delete;
+    FunctionalSequence(FunctionalSequence const&) = delete;
 
-    FunctionalSequence(FunctionalSequence &&) = delete;
+    FunctionalSequence(FunctionalSequence&&) = delete;
 };
 
 #endif // DCABENCHMARK_FUNCTIONALSEQUENCE_HPP
