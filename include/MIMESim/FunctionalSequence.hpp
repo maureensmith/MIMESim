@@ -5,33 +5,36 @@
 #ifndef DCABENCHMARK_FUNCTIONALSEQUENCE_HPP
 #define DCABENCHMARK_FUNCTIONALSEQUENCE_HPP
 
-#include <vector>
-#include <iostream>
-#include <random>
 #include "Mutation.hpp"
 
-class FunctionalSequence {
+#include <iostream>
+#include <random>
+#include <vector>
 
-private:
+class FunctionalSequence
+{
+
+  private:
     // original Kd for each site
     const std::vector<double> kds;
     // original epistasis values for each position pair
     const std::vector<double> epistasis;
 
-    //singleton class has a private constructor which is called by a public method
-    FunctionalSequence():kds(drawKdValues()), epistasis(drawEpistasis()){};
+    // singleton class has a private constructor which is called by a public method
+    FunctionalSequence() : kds(drawKdValues()), epistasis(drawEpistasis()){};
 
     /**
-     * Draws the Kds value according to log normal distribution with a probability p_kd for each L postions and q-1 possible mutations
+     * Draws the Kds value according to log normal distribution with a probability p_kd for each L postions and q-1
+     * possible mutations
      * @return the vector with all Kd values
      */
     std::vector<double> drawKdValues();
 
-
     /**
-    * Draws the epistasis value for each PWVal (= each pair of positions and each combination of possible mutation symbols) according to log normal distribution with a probability p_epi
-    * @return the vector with all Epistasis values
-    */
+     * Draws the epistasis value for each PWVal (= each pair of positions and each combination of possible mutation
+     * symbols) according to log normal distribution with a probability p_epi
+     * @return the vector with all Epistasis values
+     */
     std::vector<double> drawEpistasis();
 
     /*
@@ -49,12 +52,11 @@ private:
      */
     unsigned int getVectorIndex(const Mutation& m);
 
-public:
-
+  public:
     /**
-    * @return Vector of Kd values for or all possible mutations in ascending order.
-    */
-    const std::vector<double> &getKd();
+     * @return Vector of Kd values for or all possible mutations in ascending order.
+     */
+    const std::vector<double>& getKd();
 
     /**
      * @param p Mutated position and symbol
@@ -65,7 +67,7 @@ public:
     /**
      * @return Vector of epistasis values for or all pairwise mutations in ascending order with position i<j.
      */
-    const std::vector<double> &getEpistasis();
+    const std::vector<double>& getEpistasis();
 
     //
     /**
@@ -74,7 +76,7 @@ public:
      * @param b Mutation 2
      * @return Epistasis value for the given pair of mutations
      */
-    const double &getEpistasis(const Mutation& a, const Mutation& b);
+    const double& getEpistasis(const Mutation& a, const Mutation& b);
 
     /**
      *
@@ -97,8 +99,6 @@ public:
     FunctionalSequence(FunctionalSequence const&) = delete;
 
     FunctionalSequence(FunctionalSequence&&) = delete;
-
 };
 
-
-#endif //DCABENCHMARK_FUNCTIONALSEQUENCE_HPP
+#endif // DCABENCHMARK_FUNCTIONALSEQUENCE_HPP

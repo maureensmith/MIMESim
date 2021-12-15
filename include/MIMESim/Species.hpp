@@ -9,44 +9,46 @@
 #ifndef Species_hpp
 #define Species_hpp
 
-#include <stdio.h>
-#include <array>
-#include <vector>
-#include <map>
-#include <set>
-#include <random>
-#include <unordered_map>
-#include "Mutation.hpp"
 #include "Count.hpp"
+#include "Mutation.hpp"
 
-namespace species {
-    //TODO weg nach test
-    //typedef std::array<unsigned int, Constants::MAX_MUT> mutArr;
-    //typedef std::vector<unsigned int> mutVector;
-    //TODO ist ja eigentlich generell, nicht nur Species. Irgedwo anders hinschieben?
-    //TODO stattdessen einfach Mutation?
-   // typedef std::pair<unsigned, unsigned> posMutPair;
-    //contain each mutated position with the respective mutation
+#include <array>
+#include <map>
+#include <random>
+#include <set>
+#include <stdio.h>
+#include <unordered_map>
+#include <vector>
+
+namespace species
+{
+    // TODO weg nach test
+    // typedef std::array<unsigned int, Constants::MAX_MUT> mutArr;
+    // typedef std::vector<unsigned int> mutVector;
+    // TODO ist ja eigentlich generell, nicht nur Species. Irgedwo anders hinschieben?
+    // TODO stattdessen einfach Mutation?
+    // typedef std::pair<unsigned, unsigned> posMutPair;
+    // contain each mutated position with the respective mutation
     typedef std::vector<Mutation> mutVector;
-    //typedef std::map<int, std::array<int, 2>> idCountMap;
-    //TODO umändern in unordered_map und vergleichen
+    // typedef std::map<int, std::array<int, 2>> idCountMap;
+    // TODO umändern in unordered_map und vergleichen
     typedef std::unordered_map<int, int> idCountMap;
 
-    
-    class Species {
+    class Species
+    {
 
-    private:
+      private:
         const unsigned int specId;
         unsigned int count;
         const unsigned int numMut;
-        //mutatated positions need to be in ascending order
-        //TODO where to test this, exception?
+        // mutatated positions need to be in ascending order
+        // TODO where to test this, exception?
         const mutVector mutatedPositions;
-        //double freq;
-        //KD of the the given sequence, adding all single Kds of the mutations and the epistatic effects for pairs
+        // double freq;
+        // KD of the the given sequence, adding all single Kds of the mutations and the epistatic effects for pairs
         double kd = 1.0;
-        //TODO for later count purposes directly create a read. nee weg damit, nimmt zu viel platz ein
-       // const ref::ref_map read;
+        // TODO for later count purposes directly create a read. nee weg damit, nimmt zu viel platz ein
+        // const ref::ref_map read;
 
         /**** after ODE: save bound and unbound fraction information ****/
 
@@ -56,12 +58,11 @@ namespace species {
         int errorCountBound;
         int errorCountUnbound;
 
-
         unsigned int getNumberOfMutationsById();
 
         mutVector specIdxToMutPos();
 
-    public:
+      public:
         Species(const unsigned int id);
 
         const unsigned int getSpecId() const;
@@ -70,7 +71,7 @@ namespace species {
 
         const unsigned int getNumMut() const;
 
-        const mutVector &getMutatedPositions() const;
+        const mutVector& getMutatedPositions() const;
 
         double getFreq() const;
 
@@ -82,9 +83,9 @@ namespace species {
 
         void computeSpeciesKd();
 
-        //TODO weg
-        //const ref::ref_map &getRead() const;
-        //ref::ref_map createRead();
+        // TODO weg
+        // const ref::ref_map &getRead() const;
+        // ref::ref_map createRead();
 
         unsigned int getMutCountBound() const;
 
@@ -106,16 +107,15 @@ namespace species {
 
         void addErrorCountUnbound(int errorCountUnbound);
 
-        //Fraction of all M sequences
+        // Fraction of all M sequences
         double getTotalFractionBound();
 
         double getTotalFractionUnbound();
 
-        //fraction of the one particular species
+        // fraction of the one particular species
         double getFractionBound();
 
         double getFractionUnbound();
-
     };
 
     using species_map = std::unordered_map<int, Species>;
@@ -130,8 +130,9 @@ namespace species {
 
     std::set<Mutation> drawError_2(const mutVector& mutations, std::default_random_engine& generator);
 
-    count::counter_collection countMutationsWithErrors(const std::valarray<unsigned int>& SBound, const std::valarray<unsigned int>& SUnbound,
-                                  const species_map& spec_map);
+    count::counter_collection countMutationsWithErrors(const std::valarray<unsigned int>& SBound,
+                                                       const std::valarray<unsigned int>& SUnbound,
+                                                       const species_map& spec_map);
 
 }
 #endif /* Species_hpp */
